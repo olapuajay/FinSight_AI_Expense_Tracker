@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 
 import authRoutes from "./routes/authRoutes.js";
+import transactions from "./routes/transactionRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/transactions", transactions)
 
 app.get("/", (req, res) => {
   res.send({ message: "Hello from server!" });
