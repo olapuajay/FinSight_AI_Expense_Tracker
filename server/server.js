@@ -6,6 +6,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import transactions from "./routes/transactionRoutes.js";
+import budgetRoutes from "./routes/budgetRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -16,7 +17,8 @@ app.use(cors());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/transactions", transactions)
+app.use("/api/transactions", transactions);
+app.use("/api/budgets", budgetRoutes);
 
 app.get("/", (req, res) => {
   res.send({ message: "Hello from server!" });
