@@ -1,13 +1,12 @@
 import budgetModel from "../models/Budget.js";
-import mongoose from "mongoose";
 
 export const setBudget = async (req, res) => {
   try {
     const { userId, month, year, limit } = req.body;
 
     const existingBudget = await budgetModel.findOne({ 
-      userId: new mongoose.Types.ObjectId(userId), 
-      month: Number(month), 
+      userId, 
+      month: Number(month),
       year: Number(year) 
     });
 
@@ -15,7 +14,7 @@ export const setBudget = async (req, res) => {
       return res.status(400).json({ message: "Budget already exists for this month" });
     }
 
-    const budget = await budgetModel.create({ userId: new mongoose.Types.ObjectId(userId), month: Number(month), year: Number(year), limit });
+    const budget = await budgetModel.create({ userId, month: Number(month), year: Number(year), limit });
     res.status(201).json({ message: "Budget set successfully", budget });
   } catch (error) {
     console.log(error);
@@ -60,7 +59,7 @@ export const checkBudgetAlert = async (req, res) => {
   try {
     const { userId, month, year } = req.params;
 
-    const budget = await budgetModel.findOne({ userId: new mongoose.Types.ObjectId(userId), month: Number(month), year: Number(year) });
+    const budget = await budgetModel.findOne({ userId, month: Number(month), year: Number(year) });
     if(!budget) {
       return res.status(404).json({ message: "No budget found" });
     }

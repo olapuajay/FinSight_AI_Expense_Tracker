@@ -1,6 +1,5 @@
 import transactionModel from "../models/Transaction.js";
 import budgetModel from "../models/Budget.js";
-import mongoose from "mongoose";
 
 export const addTransaction = async (req, res) => {
   try {
@@ -24,7 +23,7 @@ export const addTransaction = async (req, res) => {
     const month = Number(parsedDate.getMonth() + 1);
     const year = Number(parsedDate.getFullYear());
 
-    const budget = await budgetModel.findOne({ userId: new mongoose.Types.ObjectId(userId), month, year });
+    const budget = await budgetModel.findOne({ userId, month, year });
 
     if(budget) {
       budget.spent += amount;
@@ -50,16 +49,44 @@ export const getTrasactions = async (req, res) => {
 
 export const updateTransaction = async (req, res) => {
   try {
-    const transaction = await transactionModel.findOneAndUpdate(
+    const { amount, category, date, payment, note } = req.body;
+
+    const oldTransaction = await transactionModel.findOne(
       { _id: req.params.id, user: req.user.id },
-      req.body,
-      { new: true },
     );
-    if(!transaction) {
+    if(!oldTransaction) {
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    res.json({ message: "Transaction updated", transaction });
+    const oldMonth = oldTransaction.date.getMonth() + 1;
+    const oldYear = oldTransaction.date.getFullYear();
+
+    const oldBudget = await budgetModel.findOne({ userId: req.user.id, month: oldMonth, year: oldYear });
+    if(oldBudget) {
+      oldBudget.spent -= oldTransaction.amount;
+      if(oldBudget.spent < 0) oldBudget.spent = 0;
+      await oldBudget.save();
+    }
+
+    oldTransaction.amount = amount ?? oldTransaction.amount;
+    oldTransaction.category = category ?? oldTransaction.category;
+    oldTransaction.date = date ? new Date(date) : oldTransaction.date;
+    oldTransaction.payment = payment ?? oldTransaction.payment;
+    oldTransaction.note = note ?? oldTransaction.note;
+    const updatedTransaction = await oldTransaction.save();
+
+    const newMonth = updatedTransaction.date.getMonth() + 1;
+    const newYear = updatedTransaction.date.getFullYear();
+
+    let newBudget = await budgetModel.findOne({ userId: req.user.id, month: newMonth, year: newYear });
+    if(!newBudget) {
+      newBudget = await budgetModel.create({ userId: req.user.id, month: newMonth, year: newYear, spent: 0 });
+    }
+
+    newBudget.spent += updatedTransaction.amount;
+    await newBudget.save();
+
+    res.json({ message: "Transaction updated", transaction: updatedTransaction });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something went wrong" });
@@ -81,7 +108,7 @@ export const deleteTransaction = async (req, res) => {
     const year = Number(transaction.date.getFullYear());
 
     const budget = await budgetModel.findOne({ 
-      userId: new mongoose.Types.ObjectId(req.user.id),
+      userId: req.user.id,
       month,
       year
     });
