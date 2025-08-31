@@ -1,5 +1,6 @@
 import transactionModel from "../models/Transaction.js";
 import budgetModel from "../models/Budget.js";
+import { parseReceipt } from "../utils/receiptParser.js";
 
 export const addTransaction = async (req, res) => {
   try {
@@ -123,5 +124,25 @@ export const deleteTransaction = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const uploadReceipt = async (req, res) => {
+  try {
+    const parsedData = await parseReceipt(req.file.path);
+    if(!parsedData) {
+      return res.status(400).json({ message: "Failed to parse receipt" });
+    }
+
+    const newTransaction = new transactionModel({
+      user: req.user.id,
+      ...parsedData,
+    });
+
+    await newTransaction.save();
+    res.status(201).json({ message: "Processed receipt successfully", newTransaction });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error processing receipt" });
   }
 };
