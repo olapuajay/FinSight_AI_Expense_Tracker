@@ -24,17 +24,12 @@ export async function parseReceipt(imagePath) {
   Return only the JSON object, nothing else.
   `;
 
-  console.log(`Processing receipt at path: ${imagePath}`);
   
   const fileExtension = path.extname(imagePath);
-  console.log(`File extension: ${fileExtension || 'No extension detected'}`);
   
   let mimeType = mime.lookup(imagePath);
-  console.log(`MIME type from lookup: ${mimeType}`);
   
-  if (!mimeType || mimeType === false) {
-    console.log("MIME type lookup failed, trying file extension fallback");
-    
+  if (!mimeType || mimeType === false) {    
     const ext = fileExtension.toLowerCase();
     switch (ext) {
       case '.jpg':
@@ -51,7 +46,6 @@ export async function parseReceipt(imagePath) {
         mimeType = 'image/gif';
         break;
       default:
-        console.log("No file extension, attempting to detect from file content");
         const buffer = fs.readFileSync(imagePath);
         const firstBytes = buffer.toString('hex', 0, 4);
         
@@ -64,12 +58,8 @@ export async function parseReceipt(imagePath) {
         } else if (firstBytes.startsWith('4749')) {
           mimeType = 'image/gif';
         } else {
-          console.log(`File magic bytes: ${firstBytes}`);
           throw new Error(`Unsupported file type. Unable to detect image format. Please upload JPG, PNG, WEBP, or GIF images.`);
         }
-        
-        console.log(`Detected MIME type from file content: ${mimeType}`);
-        break;
     }
   }
 
@@ -77,8 +67,6 @@ export async function parseReceipt(imagePath) {
   if (!supportedTypes.includes(mimeType)) {
     throw new Error(`Unsupported MIME type: ${mimeType}. Gemini supports: ${supportedTypes.join(', ')}`);
   }
-
-  console.log(`Processing image with MIME type: ${mimeType}`);
 
   const image = {
     inlineData: {
@@ -88,29 +76,19 @@ export async function parseReceipt(imagePath) {
   };
 
   const result = await model.generateContent([prompt, image]);
-  const response = result.response.text();
+  const response = result.response.text().trim();
 
-  console.log("Raw Gemini response:", response);
 
   try {
-    let cleanResponse = response.trim();
-    
-    if (cleanResponse.startsWith('```json')) {
-      cleanResponse = cleanResponse.replace(/```json\s*/, '').replace(/\s*```$/, '');
-    } else if (cleanResponse.startsWith('```')) {
-      cleanResponse = cleanResponse.replace(/```\s*/, '').replace(/\s*```$/, '');
-    }
-    
-    cleanResponse = cleanResponse.trim();
-    console.log("Cleaned response for parsing:", cleanResponse);
-    
-    const parsedData = JSON.parse(cleanResponse);
-    console.log("Successfully parsed data:", parsedData);
-    
-    return parsedData;
+    let cleanResponse = response
+      .replace(/^```json\s*/, "")
+      .replace(/^```\s*/, "")
+      .replace(/\s*```$/, "")
+      .trim();
+        
+    return JSON.parse(cleanResponse);
   } catch (error) {
     console.error("Error parsing Gemini response:", error.message);
-    console.error("Raw response:", response);
     return null;
   }
 }

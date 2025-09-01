@@ -13,7 +13,7 @@ export const addTransaction = async (req, res) => {
     }
 
     const transaction = await transactionModel.create({ 
-      user: userId,
+      userId,
       category,
       amount: Number(amount),
       date: parsedDate,
@@ -24,12 +24,20 @@ export const addTransaction = async (req, res) => {
     const month = Number(parsedDate.getMonth() + 1);
     const year = Number(parsedDate.getFullYear());
 
-    const budget = await budgetModel.findOne({ userId, month, year });
+    let budget = await budgetModel.findOne({ userId, month, year });
 
-    if(budget) {
-      budget.spent += amount;
-      await budget.save();
+    if(!budget) {
+      budget = await budgetModel.create({
+        userId,
+        month,
+        year,
+        limit: 0,
+        spent: 0,
+      });
     }
+
+    budget.spent += Number(amount);
+    await budget.save();
 
     res.status(201).json({ message: "New transaction added", transaction });
   } catch (error) {
@@ -40,7 +48,7 @@ export const addTransaction = async (req, res) => {
 
 export const getTrasactions = async (req, res) => {
   try {
-    const transactions = await transactionModel.find({ user: req.user.id }).sort({ date: -1 });
+    const transactions = await transactionModel.find({ userId: req.user.id }).sort({ date: -1 });
     res.json(transactions);
   } catch (error) {
     console.log(error);
@@ -53,7 +61,7 @@ export const updateTransaction = async (req, res) => {
     const { amount, category, date, payment, note } = req.body;
 
     const oldTransaction = await transactionModel.findOne(
-      { _id: req.params.id, user: req.user.id },
+      { _id: req.params.id, userId: req.user.id },
     );
     if(!oldTransaction) {
       return res.status(404).json({ message: "Transaction not found" });
@@ -97,13 +105,13 @@ export const updateTransaction = async (req, res) => {
 export const deleteTransaction = async (req, res) => {
   try {
     const transaction = await transactionModel.findOne(
-      { _id: req.params.id, user: req.user.id, }
+      { _id: req.params.id, userId: req.user.id, }
     );
     if(!transaction) {
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    await transactionModel.deleteOne({ _id: req.params.id, user: req.user.id });
+    await transactionModel.deleteOne({ _id: req.params.id, userId: req.user.id });
 
     const month = Number(transaction.date.getMonth() + 1);
     const year = Number(transaction.date.getFullYear());
@@ -134,12 +142,42 @@ export const uploadReceipt = async (req, res) => {
       return res.status(400).json({ message: "Failed to parse receipt" });
     }
 
-    const newTransaction = new transactionModel({
-      user: req.user.id,
-      ...parsedData,
+    const userId = req.user.id;
+    const { category, amount, date, payment, note } = parsedData;
+
+    const parsedDate = date ? new Date(date) : new Date();
+    if(isNaN(parsedDate)) {
+      return res.status(400).json({ message: "Invalid date extracted from the receipt" });
+    }
+
+    const newTransaction = await transactionModel.create({
+      userId,
+      category,
+      amount: Number(amount),
+      date: parsedDate,
+      payment,
+      note
     });
 
-    await newTransaction.save();
+    const month = Number(parsedDate.getMonth() + 1);
+    const year = Number(parsedDate.getFullYear());
+
+    let budget = await budgetModel.findOne({ userId, month, year });
+
+    if(!budget) {
+      budget = await budgetModel.create({
+        userId,
+        month,
+        year,
+        limit: 0,
+        spent: 0,
+      });
+    }
+
+    budget.spent += Number(amount);
+    await budget.save();
+
+
     res.status(201).json({ message: "Processed receipt successfully", newTransaction });
   } catch (error) {
     console.log(error);
