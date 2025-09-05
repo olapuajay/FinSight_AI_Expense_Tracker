@@ -1,6 +1,9 @@
 import transactionModel from "../models/Transaction.js";
 import budgetModel from "../models/Budget.js";
-import { parseReceipt } from "../utils/receiptParser.js";
+import { extractTransactionFromReceipt } from "../services/gemini.js";
+import fs from "fs";
+import path from "path";
+import mime from "mime-types";
 
 export const addTransaction = async (req, res) => {
   try {
@@ -137,13 +140,35 @@ export const deleteTransaction = async (req, res) => {
 
 export const uploadReceipt = async (req, res) => {
   try {
-    const parsedData = await parseReceipt(req.file.path);
-    if(!parsedData) {
-      return res.status(400).json({ message: "Failed to parse receipt" });
+    if(!req.file) {
+      return res.status(400).json({ message: "No receipt uploaded" });
+    }
+
+    const receiptPath = req.file.path;
+
+    let mimeType = mime.lookup(receiptPath);
+    if(!mimeType) {
+      return res.status(400).json({ message: "Unsupported or unknown file type" });
+    }
+
+    const supportedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if(!supportedTypes) {
+      return res.status(400).json({
+        message: `Unsupported file type: ${mimeType}. Allowed: ${supportedTypes.join(", ")}`
+      });
+    }
+
+    const receiptBuffer = fs.readFileSync(receiptPath);
+    const receiptBase64 = receiptBuffer.toString("base64");
+
+    const extracted = await extractTransactionFromReceipt(receiptBase64, mimeType);
+
+    if(!extracted) {
+      return res.status(400).json({ message: "Failed to extract data from receipt" });
     }
 
     const userId = req.user.id;
-    const { category, amount, date, payment, note } = parsedData;
+    const { category, amount, date, payment, note } = extracted;
 
     const parsedDate = date ? new Date(date) : new Date();
     if(isNaN(parsedDate)) {
@@ -152,7 +177,7 @@ export const uploadReceipt = async (req, res) => {
 
     const newTransaction = await transactionModel.create({
       userId,
-      category,
+      category: category || "other",
       amount: Number(amount),
       date: parsedDate,
       payment,

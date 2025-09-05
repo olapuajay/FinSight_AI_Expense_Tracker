@@ -2,10 +2,9 @@ import express from "express";
 import multer from "multer";
 import { addTransaction, getTrasactions, updateTransaction, deleteTransaction, uploadReceipt } from "../controllers/transactionController.js";
 import { protect } from "../middlewares/authMiddleware.js";
+import upload from "../middlewares/uploadMiddleware.js";
 
 const router = express.Router();
-
-const upload = multer({ dest: "uploads/" });
 
 router.post("/", protect, addTransaction);
 router.get("/", protect, getTrasactions);
