@@ -76,15 +76,39 @@ export async function budgetInsights(transaction, budget) {
     Given these transactions: ${JSON.stringify(transaction)},
     and monthly budget: ${JSON.stringify(budget)},
 
-    Provide a short summary of:
-    - total spent per category
-    - warning if overspending
-    - saving tips.
+    Respond with ONLY a raw JSON object. 
+    Do NOT include markdown, code fences, or any explanation. 
+    Output must be directly parsable with JSON.parse().
 
-    Answer in plain text (no JSON).
+    {
+      "totalsByCategory": { "category1": number, "category2": number, ... },
+      "warnings": [ "warning1", "warning2", ... ],
+      "tips": [ "tip1", "tip2", ... ],
+    }
+
+    Rules:
+    - "totalsByCategory" should be numeric totals for each category.
+    - "warnings" should contain any budget alerts (e.g., overspending, nearing limit).
+    - "tips" should be practical saving tips.
+    - If nothing to report, return empty arrays/objects.
   `;
 
-  return await askGemini(prompt);
+  const response = await askGemini(prompt);
+
+  try {
+    const cleaned = response
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+    return JSON.parse(cleaned);
+  } catch (error) {
+    console.log("Gemini budgetInsights parse error: ", response);
+    return {
+      totalsByCategory: {},
+      warnings: [],
+      tips: [],
+    };
+  }
 }
 
 export default genAI;
