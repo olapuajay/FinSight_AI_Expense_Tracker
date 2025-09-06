@@ -1,6 +1,6 @@
 import transactionModel from "../models/Transaction.js";
 import budgetModel from "../models/Budget.js";
-import { extractTransactionFromReceipt } from "../services/gemini.js";
+import { autoCategorizeTransaction, extractTransactionFromReceipt } from "../services/gemini.js";
 import fs from "fs";
 import path from "path";
 import mime from "mime-types";
@@ -170,6 +170,19 @@ export const uploadReceipt = async (req, res) => {
     const userId = req.user.id;
     const { category, amount, date, payment, note } = extracted;
 
+    if(!category || category === "other") {
+      if(note && note.trim() !== "") {
+        try {
+          category = await autoCategorizeTransaction(note);
+        } catch (error) {
+          console.log("Auto-Categorization failed: ", error);
+          category = "other";
+        }
+      } else {
+        category = "other";
+      }
+    }
+
     const parsedDate = date ? new Date(date) : new Date();
     if(isNaN(parsedDate)) {
       return res.status(400).json({ message: "Invalid date extracted from the receipt" });
@@ -177,7 +190,7 @@ export const uploadReceipt = async (req, res) => {
 
     const newTransaction = await transactionModel.create({
       userId,
-      category: category || "other",
+      category,
       amount: Number(amount),
       date: parsedDate,
       payment,
