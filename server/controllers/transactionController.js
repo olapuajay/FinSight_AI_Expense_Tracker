@@ -8,7 +8,7 @@ import mime from "mime-types";
 export const addTransaction = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { category, amount, date, payment, note } = req.body;
+    const { type, category, amount, date, payment, note } = req.body;
 
     const parsedDate = date ? new Date(date) : new Date();
     if (isNaN(parsedDate)) {
@@ -17,6 +17,7 @@ export const addTransaction = async (req, res) => {
 
     const transaction = await transactionModel.create({ 
       userId,
+      type,
       category,
       amount: Number(amount),
       date: parsedDate,
@@ -24,23 +25,24 @@ export const addTransaction = async (req, res) => {
       note, 
     });
 
-    const month = Number(parsedDate.getMonth() + 1);
-    const year = Number(parsedDate.getFullYear());
-
-    let budget = await budgetModel.findOne({ userId, month, year });
-
-    if(!budget) {
-      budget = await budgetModel.create({
-        userId,
-        month,
-        year,
-        limit: 0,
-        spent: 0,
-      });
+    if(type === "expense") {
+      const month = Number(parsedDate.getMonth() + 1);
+      const year = Number(parsedDate.getFullYear());
+  
+      let budget = await budgetModel.findOne({ userId, month, year });
+  
+      if(!budget) {
+        budget = await budgetModel.create({
+          userId,
+          month,
+          year,
+          limit: 0,
+          spent: 0,
+        });
+      }
+      budget.spent += Number(amount);
+      await budget.save();
     }
-
-    budget.spent += Number(amount);
-    await budget.save();
 
     res.status(201).json({ message: "New transaction added", transaction });
   } catch (error) {
@@ -61,7 +63,7 @@ export const getTrasactions = async (req, res) => {
 
 export const updateTransaction = async (req, res) => {
   try {
-    const { amount, category, date, payment, note } = req.body;
+    const { amount, category, date, payment, note, type } = req.body;
 
     const oldTransaction = await transactionModel.findOne(
       { _id: req.params.id, userId: req.user.id },
@@ -73,11 +75,13 @@ export const updateTransaction = async (req, res) => {
     const oldMonth = oldTransaction.date.getMonth() + 1;
     const oldYear = oldTransaction.date.getFullYear();
 
-    const oldBudget = await budgetModel.findOne({ userId: req.user.id, month: oldMonth, year: oldYear });
-    if(oldBudget) {
-      oldBudget.spent -= oldTransaction.amount;
-      if(oldBudget.spent < 0) oldBudget.spent = 0;
-      await oldBudget.save();
+    if(oldTransaction.type === "expense") {
+      const oldBudget = await budgetModel.findOne({ userId: req.user.id, month: oldMonth, year: oldYear });
+      if(oldBudget) {
+        oldBudget.spent -= oldTransaction.amount;
+        if(oldBudget.spent < 0) oldBudget.spent = 0;
+        await oldBudget.save();
+      }
     }
 
     oldTransaction.amount = amount ?? oldTransaction.amount;
@@ -90,13 +94,15 @@ export const updateTransaction = async (req, res) => {
     const newMonth = updatedTransaction.date.getMonth() + 1;
     const newYear = updatedTransaction.date.getFullYear();
 
-    let newBudget = await budgetModel.findOne({ userId: req.user.id, month: newMonth, year: newYear });
-    if(!newBudget) {
-      newBudget = await budgetModel.create({ userId: req.user.id, month: newMonth, year: newYear, spent: 0 });
+    if(updatedTransaction.type === "expense") {
+      let newBudget = await budgetModel.findOne({ userId: req.user.id, month: newMonth, year: newYear });
+      if(!newBudget) {
+        newBudget = await budgetModel.create({ userId: req.user.id, month: newMonth, year: newYear, spent: 0 });
+      }
+  
+      newBudget.spent += updatedTransaction.amount;
+      await newBudget.save();
     }
-
-    newBudget.spent += updatedTransaction.amount;
-    await newBudget.save();
 
     res.json({ message: "Transaction updated", transaction: updatedTransaction });
   } catch (error) {
@@ -116,19 +122,21 @@ export const deleteTransaction = async (req, res) => {
 
     await transactionModel.deleteOne({ _id: req.params.id, userId: req.user.id });
 
-    const month = Number(transaction.date.getMonth() + 1);
-    const year = Number(transaction.date.getFullYear());
-
-    const budget = await budgetModel.findOne({ 
-      userId: req.user.id,
-      month,
-      year
-    });
-
-    if(budget) {
-      budget.spent -= transaction.amount;
-      if(budget.spent < 0) budget.spent = 0;
-      await budget.save();
+    if(transaction.type === "expense") {
+      const month = Number(transaction.date.getMonth() + 1);
+      const year = Number(transaction.date.getFullYear());
+  
+      const budget = await budgetModel.findOne({ 
+        userId: req.user.id,
+        month,
+        year
+      });
+  
+      if(budget) {
+        budget.spent -= transaction.amount;
+        if(budget.spent < 0) budget.spent = 0;
+        await budget.save();
+      }
     }
     
     res.json({ message: "Transaction deleted" });
@@ -168,7 +176,11 @@ export const uploadReceipt = async (req, res) => {
     }
 
     const userId = req.user.id;
-    const { category, amount, date, payment, note } = extracted;
+    const { type, category, amount, date, payment, note } = extracted;
+
+    if(!["income", "expense"].includes(type)) {
+      type = "expense";
+    }
 
     if(!category || category === "other") {
       if(note && note.trim() !== "") {
@@ -190,6 +202,7 @@ export const uploadReceipt = async (req, res) => {
 
     const newTransaction = await transactionModel.create({
       userId,
+      type,
       category,
       amount: Number(amount),
       date: parsedDate,
@@ -197,24 +210,25 @@ export const uploadReceipt = async (req, res) => {
       note
     });
 
-    const month = Number(parsedDate.getMonth() + 1);
-    const year = Number(parsedDate.getFullYear());
-
-    let budget = await budgetModel.findOne({ userId, month, year });
-
-    if(!budget) {
-      budget = await budgetModel.create({
-        userId,
-        month,
-        year,
-        limit: 0,
-        spent: 0,
-      });
+    if(type === "expense") {
+      const month = Number(parsedDate.getMonth() + 1);
+      const year = Number(parsedDate.getFullYear());
+  
+      let budget = await budgetModel.findOne({ userId, month, year });
+  
+      if(!budget) {
+        budget = await budgetModel.create({
+          userId,
+          month,
+          year,
+          limit: 0,
+          spent: 0,
+        });
+      }
+  
+      budget.spent += Number(amount);
+      await budget.save();
     }
-
-    budget.spent += Number(amount);
-    await budget.save();
-
 
     res.status(201).json({ message: "Processed receipt successfully", newTransaction });
   } catch (error) {

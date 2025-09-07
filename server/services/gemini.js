@@ -26,12 +26,15 @@ export async function extractTransactionFromReceipt(receiptBase64, mimeType) {
   Extract structured data from the receipt.
   Return ONLY a valid JSON object in this exact format (no markdown, no code blocks, no extra text):
   {
+    "type": "<income>|<expense>|null",
     "amount": <number>,
     "date": "<yyyy-mm-dd>",
     "category": "<category>",
     "payment": "<cash|card|upi>",
     "note": "<short description>"
   }
+  If the receipt is for income (like salary, refund, transfer in), set "type" to "income".
+  Otherwise, set "type" to "expense".
   If any field is missing, leave it null.
   Return only the JSON object, nothing else.
   `;
