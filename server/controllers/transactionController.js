@@ -2,8 +2,15 @@ import transactionModel from "../models/Transaction.js";
 import budgetModel from "../models/Budget.js";
 import { autoCategorizeTransaction, extractTransactionFromReceipt } from "../services/gemini.js";
 import fs from "fs";
-import path from "path";
 import mime from "mime-types";
+
+const updateCategorySpent = (budget, category, amount) => {
+  const cat = budget.categoryBudgets.find(c => c.category === category);
+  if(cat) {
+    cat.spent = (cat.spent || 0) + amount;
+    if(cat.spent < 0) cat.spent = 0;
+  }
+}
 
 export const addTransaction = async (req, res) => {
   try {
@@ -38,9 +45,11 @@ export const addTransaction = async (req, res) => {
           year,
           limit: 0,
           spent: 0,
+          categoryBudgets: [],
         });
       }
       budget.spent += Number(amount);
+      updateCategorySpent(budget, category, Number(amount));
       await budget.save();
     }
 
@@ -80,6 +89,7 @@ export const updateTransaction = async (req, res) => {
       if(oldBudget) {
         oldBudget.spent -= oldTransaction.amount;
         if(oldBudget.spent < 0) oldBudget.spent = 0;
+        updateCategorySpent(oldBudget, oldTransaction.category, -oldTransaction.amount);
         await oldBudget.save();
       }
     }
@@ -89,6 +99,7 @@ export const updateTransaction = async (req, res) => {
     oldTransaction.date = date ? new Date(date) : oldTransaction.date;
     oldTransaction.payment = payment ?? oldTransaction.payment;
     oldTransaction.note = note ?? oldTransaction.note;
+    oldTransaction.type = type ?? oldTransaction.type;
     const updatedTransaction = await oldTransaction.save();
 
     const newMonth = updatedTransaction.date.getMonth() + 1;
@@ -97,10 +108,11 @@ export const updateTransaction = async (req, res) => {
     if(updatedTransaction.type === "expense") {
       let newBudget = await budgetModel.findOne({ userId: req.user.id, month: newMonth, year: newYear });
       if(!newBudget) {
-        newBudget = await budgetModel.create({ userId: req.user.id, month: newMonth, year: newYear, spent: 0 });
+        newBudget = await budgetModel.create({ userId: req.user.id, month: newMonth, year: newYear, spent: 0, limit: 0, categoryBudgets: [], });
       }
   
       newBudget.spent += updatedTransaction.amount;
+      updateCategorySpent(newBudget, updatedTransaction.category, updatedTransaction.amount);
       await newBudget.save();
     }
 
@@ -135,6 +147,7 @@ export const deleteTransaction = async (req, res) => {
       if(budget) {
         budget.spent -= transaction.amount;
         if(budget.spent < 0) budget.spent = 0;
+        updateCategorySpent(budget, transaction.category, -transaction.amount);
         await budget.save();
       }
     }
@@ -227,6 +240,7 @@ export const uploadReceipt = async (req, res) => {
       }
   
       budget.spent += Number(amount);
+      updateCategorySpent(budget, category, Number(amount));
       await budget.save();
     }
 

@@ -1,5 +1,17 @@
 import mongoose from "mongoose";
 
+const categoryBudgetSchema = new mongoose.Schema({
+  category: {
+    type: String,
+    required: true,
+    enum: [
+      "groceries", "food", "shopping", "travel", "entertainment", "bills", "utilities", "rent", "other"
+    ]
+  },
+  spent: { type: Number, default: 0 },
+  categoryLimit: { type: Number, default: 0 },
+});
+
 const budgetSchema = new mongoose.Schema(
   {
     userId: {
@@ -11,6 +23,7 @@ const budgetSchema = new mongoose.Schema(
     year: { type: Number, required: true },
     limit: { type: Number, required: true },
     spent: { type: Number, default: 0 },
+    categoryBudgets: [categoryBudgetSchema],
   }, { timestamps: true }
 );
 
