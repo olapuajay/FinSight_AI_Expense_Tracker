@@ -8,6 +8,7 @@ import userRoutes from "./routes/userRoutes.js";
 import transactions from "./routes/transactionRoutes.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
 import budgetInsightsRoutes from "./routes/budgetInsightsRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 
 connectDB();
 
@@ -21,6 +22,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/transactions", transactions);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/budget-insights", budgetInsightsRoutes);
+app.use("/api/report", reportRoutes);
 
 app.get("/", (req, res) => {
   res.send({ message: "Hello from server!" });
