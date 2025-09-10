@@ -251,3 +251,188 @@ export const getMonthlySummary = async (req, res) => {
     res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+export const getSpendingTrend = async (req, res) => {
+  try {
+    const { userId, month, year, granularity } = req.params;
+
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 1);
+
+    const transactions = await transactionModel.find({
+      userId,
+      date: { $gte: start, $lt: end },
+    });
+
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    if(granularity === "daily") {
+      let trend = [];
+      for(let day = 1; day <= daysInMonth; day++) {
+        const dayStart = new Date(year, month - 1, day);
+        const dayEnd = new Date(year, month - 1, day + 1);
+
+        const dayTransactions = transactions.filter(
+          t => t.date >= dayStart && t.date <= dayEnd
+        );
+
+        const expense = dayTransactions
+          .filter(t => t.type === "expense")
+          .reduce((a, t) => a + t.amount, 0);
+
+        const income = dayTransactions
+          .filter(t => t.type === "income")
+          .reduce((a, t) => a + t.amount, 0);
+        
+        trend.push({ date: `${year}-${month}-${day}`, expense, income });
+      }
+
+      return res.json({ granularity, trend })
+    }
+
+    let trend = [];
+    let weekIndex = 1;
+    for(let i = 0; i < daysInMonth; i+=7) {
+      const weekStart = new Date(year, month - 1, i + 1);
+      const weekEnd = new Date(year, month - 1, Math.min(i + 7, daysInMonth) + 1);
+
+      const weekTransactions = transactions.filter(
+        t => t.date >= weekStart && t.date <= weekEnd
+      );
+
+      const expense = weekTransactions
+        .filter(t => t.type === "expense")
+        .reduce((a, t) => a + t.amount, 0);
+
+      const income = weekTransactions
+        .filter(t => t.type === "income")
+        .reduce((a, t) => a + t.amount, 0);
+
+      trend.push({ week: `Week ${weekIndex++}`, expense, income });
+    }
+
+    res.json({ granularity, trend });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error generating spending trend" });
+  }
+}
+
+export const getCategoryBreakdown = async (req, res) => {
+  try {
+    const { userId, month, year } = req.params;
+
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 1);
+
+    const transactions = await transactionModel.find({
+      userId,
+      type: "expense",
+      date: { $gte: start, $lt: end },
+    });
+
+    let breakdown = {};
+    let totalExpense = 0;
+    
+    transactions.forEach(t => {
+      breakdown[t.category] = (breakdown[t.category] || 0) + t.amount;
+      totalExpense += t.amount;
+    });
+
+    Object.keys(breakdown).forEach(cat => {
+      breakdown[cat] = {
+        amount: breakdown[cat],
+        percent: ((breakdown[cat] / totalExpense) * 100).toFixed(2),
+      };
+    });
+
+    res.json({ totalExpense, breakdown });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error generating category breakdown" });
+  }
+};
+
+export const getIncomeVsExpense = async (req, res) => {
+  try {
+    const { userId, month, year } = req.params;
+
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 1);
+
+    const transactions = await transactionModel.find({
+      userId,
+      date: { $gte: start, $lt: end },
+    });
+
+    const totalExpense = transactions
+      .filter(t => t.type === "expense")
+      .reduce((a, t) => a + t.amount, 0);
+
+    const totalIncome = transactions
+      .filter(t => t.type === "income")
+      .reduce((a, t) => a + t.amount, 0);
+
+    res.json({ income: totalIncome, expense: totalExpense });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error generating income vs expense" });
+  }
+};
+
+export const getAiInsights = async (req, res) => {
+  try {
+    const { userId, month, year } = req.params;
+
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 1);
+
+    const transactions = await transactionModel.find({
+      userId,
+      date: { $gte: start, $lt: end },
+    });
+
+    const budget = await budgetModel.findOne({ userId, year, month });
+
+    const totalExpense = transactions
+      .filter(t => t.type === "expense")
+      .reduce((a, t) => a + t.amount, 0);
+
+    const totalIncome = transactions
+      .filter(t => t.type === "income")
+      .reduce((a, t) => a + t.amount, 0);
+
+    const savings = totalIncome - totalExpense;
+
+    let categoryBreakdown = {};
+    if (budget?.categoryBudgets?.length > 0) {
+      for (let cat of budget.categoryBudgets) {
+        const spent = transactions
+          .filter(t => t.type === "expense" && t.category === cat.category)
+          .reduce((a, t) => a + t.amount, 0);
+
+        categoryBreakdown[cat.category] = {
+          spent,
+          limit: cat.categoryLimit,
+          percent: ((spent / cat.categoryLimit) * 100).toFixed(2),
+        };
+      }
+    }
+
+    // Gemini prompt
+    const aiPrompt = `
+      You are a financial assistant. Based on this data:
+      Income: ${totalIncome}, Expense: ${totalExpense}, Savings: ${savings}
+      Category Breakdown: ${JSON.stringify(categoryBreakdown)}
+
+      Provide at least 3 clear, actionable financial insights in plain text.
+    `;
+
+    const aiAdvice = await askGemini(aiPrompt);
+
+    res.status(200).json({ insights: aiAdvice });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+}
