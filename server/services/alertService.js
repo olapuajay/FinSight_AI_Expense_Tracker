@@ -2,6 +2,7 @@ import transactionModel from "../models/Transaction.js";
 import budgetModel from "../models/Budget.js";
 import notificationModel from "../models/Notification.js";
 import { askGemini } from "./gemini.js";
+import { createNotification } from "./notificationService.js";
 import mongoose from "mongoose";
 
 export const generateAiAlerts = async () => {
@@ -55,12 +56,8 @@ export const generateAiAlerts = async () => {
         else if (msg.startsWith("[income]")) type = "income";
 
         const cleanMsg = msg.replace(/\[(budget|spending|income|general)\]/i, "").trim();
-        await notificationModel.create({
-          userId: user._id,
-          message: cleanMsg,
-          type,
-          aiGenerated: true,
-        });
+        
+        await createNotification(user._id, cleanMsg, type, true);
       }
     }
   } catch (error) {

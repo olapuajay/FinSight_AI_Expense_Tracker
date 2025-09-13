@@ -1,0 +1,13 @@
+import notificationModel from "../models/Notification.js";
+import { getIO } from "../utils/socket.js";
+
+export const createNotification = async (userId, message, type="general", aiGenerated=false) => {
+  const notification = await notificationModel.create({
+    userId, message, type, aiGenerated,
+  });
+
+  const io = getIO();
+  io.to(userId.toString()).emit("newNotification", notification);
+
+  return notification;
+};
