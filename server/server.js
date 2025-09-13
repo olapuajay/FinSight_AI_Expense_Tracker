@@ -2,7 +2,6 @@ import "./config/env.js";
 import express from "express";
 import cors from "cors";
 import { createServer } from "http";
-import { Server } from "socket.io";
 import { initSocket } from "./utils/socket.js";
 import connectDB from "./config/db.js";
 
@@ -36,28 +35,9 @@ app.get("/", (req, res) => {
 const port = process.env.PORT || 8001;
 const server = createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  }
-});
+const io = initSocket(server);
 
-initSocket(io);
-
-io.on("connection", (socket) => {
-  console.log("New client connected: ", socket.id);
-  socket.emit("welcome", { message: "Welcome to finance tracker websocket!" });
-
-  socket.on("join", (userId) => {
-    socket.join(userId);
-    console.log(`User ${userId} joined room`);
-  });
-  
-  socket.on("disconnect", () => {
-    console.log("Client disconnected: ", socket.id);
-  });
-});
+initSocket(server);
 
 app.set("io", io);
 

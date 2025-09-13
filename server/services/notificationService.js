@@ -7,7 +7,9 @@ export const createNotification = async (userId, message, type="general", aiGene
   });
 
   const io = getIO();
-  io.to(userId.toString()).emit("newNotification", notification);
+  if(io) {
+    io.to(userId.toString()).emit("newNotification", notification);
+  }
 
   return notification;
 };

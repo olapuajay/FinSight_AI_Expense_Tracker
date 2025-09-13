@@ -48,6 +48,8 @@ export const generateAiAlerts = async () => {
         .split("\n")
         .map(a => a.trim())
         .filter(a => a.length > 0);
+
+      await createNotification(user._id, "Test notification", "general");
       
       for(let msg of alerts) {
         let type = "general";
