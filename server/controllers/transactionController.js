@@ -15,7 +15,7 @@ const updateCategorySpent = (budget, category, amount) => {
 export const addTransaction = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { type, category, amount, date, payment, note } = req.body;
+    const { type, category, amount, date, payment, note, recurring } = req.body;
 
     const parsedDate = date ? new Date(date) : new Date();
     if (isNaN(parsedDate)) {
@@ -30,6 +30,7 @@ export const addTransaction = async (req, res) => {
       date: parsedDate,
       payment,
       note, 
+      recurring: recurring || { isRecurring: false },
     });
 
     if(type === "expense") {
@@ -153,6 +154,73 @@ export const deleteTransaction = async (req, res) => {
     }
     
     res.json({ message: "Transaction deleted" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const pauseRecurringTxn = async (req, res) => {
+  try {
+    const transaction = await transactionModel.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+      "recurring.isRecurring": true,
+    });
+
+    if(!transaction) {
+      return res.status(404).json({ message: "Recurring transaction not found" });
+    }
+
+    transaction.recurring.status === "paused";
+    await transaction.save();
+
+    res.json({ message: "Recurring transaction paused", transaction });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const resumeRecurringTxn = async (req, res) => {
+  try {
+    const transaction = await transactionModel.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+      "recurring.isRecurring": true,
+    });
+
+    if(!transaction) {
+      return res.status(404).json({ message: "Recurring transaction not found" });
+    }
+
+    transaction.recurring.status = "active";
+    await transaction.save();
+
+    res.json({ message: "Recurring transaction resumed", transaction });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const cancelRecurringTxn = async (req, res) => {
+  try {
+    const transaction = await transactionModel.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+      "recurring.isRecurring": true,
+    });
+
+    if(!transaction) {
+      return res.status(404).json({ message: "Recurring transaction not found" });
+    }
+
+    transaction.recurring.status = "cancelled";
+    transaction.recurring.isRecurring = false;
+    await transaction.save();
+
+    res.json({ message: "Recurring transaction cancelled", transaction });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something went wrong" });

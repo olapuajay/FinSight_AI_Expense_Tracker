@@ -15,6 +15,13 @@ const transactionSchema = new mongoose.Schema(
     date: { type: Date, default: Date.now },
     payment: { type: String, enum: ["card", "cash", "upi"] },
     note: { type: String },
+
+    recurring: {
+      isRecurring: { type: Boolean, default: false },
+      frequency: { type: String, enum: ["daily", "weekly", "monthly"], default: null },
+      endDate: { type: Date, default: null },
+      status: { type: String, enum: ["active", "paused", "cancelled"], default: "active" },
+    },
   }, { timestamps: true }
 );
 
