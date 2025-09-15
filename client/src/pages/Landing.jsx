@@ -1,9 +1,21 @@
-import React from 'react'
+import LandingNavbar from "../components/landing/LandingNavbar";
+import Hero from "../components/landing/Hero";
+import Features from "../components/landing/Features";
+import Preview from "../components/landing/Preview";
+import About from "../components/landing/About";
+import LandingFooter from "../components/landing/LandingFooter";
+import FeaturesHighlights from "../components/landing/FeaturesHighlights";
 
 function Landing() {
   return (
     <div>
-      Landing Page
+      <LandingNavbar />
+      <Hero />
+      <FeaturesHighlights />
+      <Preview />
+      <About />
+      <Features />
+      <LandingFooter />
     </div>
   )
 }
