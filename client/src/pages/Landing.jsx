@@ -5,6 +5,7 @@ import Preview from "../components/landing/Preview";
 import About from "../components/landing/About";
 import LandingFooter from "../components/landing/LandingFooter";
 import FeaturesHighlights from "../components/landing/FeaturesHighlights";
+import FAQSection from "../components/landing/FAQSection";
 
 function Landing() {
   return (
@@ -15,6 +16,7 @@ function Landing() {
       <Preview />
       <About />
       <Features />
+      <FAQSection />
       <LandingFooter />
     </div>
   )

@@ -4,7 +4,7 @@ import { SquareArrowOutUpRight } from "lucide-react";
 
 function About() {
   return (
-    <section className='bg-[#ffffff] md:py-16 py-10 px-4'>
+    <section id="about" className='bg-[#ffffff] md:py-16 py-10 px-4'>
       <div className='max-w-6xl mx-auto grid md:grid-cols-2 md:gap-12 gap-6 items-center'>
         <div>
           <h2 className='text-2xl md:text-3xl font-bold text-[#111827] md:mb-4 mb-2 text-center'>
