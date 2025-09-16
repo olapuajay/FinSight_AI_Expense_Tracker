@@ -1,28 +1,35 @@
-import { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { loginUser } from '../redux/slices/authSlice';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import { signupUser } from "../redux/slices/authSlice";
+import { useNavigate } from "react-router-dom";
 import loginImage from "../assets/login.png";
 import logo from "../assets/logo.png";
 
-function Login() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const { loading, error } = useSelector((state) => state.auth);
+function Register() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const { loading, error, user } = useSelector((state) => state.auth);
+
+  const [formData, setFormData] = useState({
+    name: "", email: "", password: "",
+  });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const result = await dispatch(loginUser(formData));
-    if(result.meta.requestStatus === "fulfilled") {
+    dispatch(signupUser(formData));
+  };
+
+  useEffect(() => {
+    if(user) {
       navigate("/dashboard");
     }
-  };
-  
+  }, [user, navigate]);
+
   return (
     <div className='min-h-screen flex items-center justify-between bg-gray-50 px-4'>
       <div>
@@ -32,10 +39,22 @@ function Login() {
         <div className='flex flex-col items-center justify-center'>
           <img src={logo} className='w-20 mb-4' alt="" />
           <h2 className='text-2xl font-bold text-center text-gray-900 mb-6'>
-            Welcome back to FinSight
+            Join FinSight Today
           </h2>
         </div>
         <form onSubmit={handleSubmit} className='space-y-4'>
+          <div>
+            <label className='block text-sm font-medium text-gray-700'>Name</label>
+            <input 
+              type="text"
+              name='name'
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className='w-full mt-1 px-3 py-2 border rounded-md shadow-sm outline-0 focus:border-blue-500 focus:border-2'
+              placeholder='Your Name'
+            />
+          </div>
           <div>
             <label className='block text-sm font-medium text-gray-700'>Email</label>
             <input 
@@ -65,13 +84,13 @@ function Login() {
           )}
 
           <button type='submit' disabled={loading} className='w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition duration-300'>
-            {loading ? "Logging in..." : "LOGIN"}
+            {loading ? "CREATING..." : "CREATE ACCOUNT"}
           </button>
         </form>
 
         <p className='text-center text-sm text-gray-600 mt-4'>
-          New to FinSight?{" "}
-          <a href="/signup" className='text-blue-600 hover:underline'>Sign up</a>
+          Already have an account?{" "}
+          <a href="/login" className='text-blue-600 hover:underline'>Log in</a>
         </p>
 
         <p className='text-center text-xs text-gray-600 mt-4 italic'>
@@ -82,4 +101,4 @@ function Login() {
   )
 }
 
-export default Login
+export default Register
