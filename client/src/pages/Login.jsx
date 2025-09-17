@@ -18,6 +18,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await dispatch(loginUser(formData));
+    // console.log(result)
     if(result.meta.requestStatus === "fulfilled") {
       navigate("/dashboard");
     }

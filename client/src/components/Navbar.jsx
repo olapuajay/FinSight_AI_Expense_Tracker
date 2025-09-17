@@ -1,0 +1,101 @@
+import React, { useState } from 'react';
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../redux/slices/authSlice';
+import { Bell, CircleUser, House, CirclePlus, List, ChartNoAxesColumnIncreasing, Settings, LogOut } from "lucide-react";
+import logo from "../assets/logo.png";
+
+import AddExpenseModal from "./AddExpenseModal";
+
+function Navbar() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/");
+  }
+
+  return (
+    <nav className='bg-white shadow-md md:px-16 md:py-3 px-2 py-2 flex items-center justify-between'>
+      <div className='inline-flex items-center'>
+        <img src={logo} className='md:w-15 w-10 h-full' alt="" />
+        <h1 className='md:font-bold font-semibold md:text-2xl text-lg text-[#2563EB]'>FinSight</h1>
+      </div>
+
+      <div className='hidden md:flex space-x-8'>
+        <Link to="/dashboard">
+          <div className='flex flex-col items-center'>
+            <House className='w-5 h-5 hover:text-[#2563EB]' />
+            <p className='text-xs'>DASHBOARD</p>
+          </div>
+        </Link>
+        <Link to="/dashboard">
+          <div className='flex flex-col items-center'>
+            <CirclePlus className='w-5 h-5 hover:text-[#2563EB]' />
+            <p className='text-xs'>ADD EXPENSE</p>
+          </div>
+        </Link>
+        <Link to="/dashboard">
+          <div className='flex flex-col items-center'>
+            <List className='w-5 h-5 hover:text-[#2563EB]' />
+            <p className='text-xs'>EXPENSE LIST</p>
+          </div>
+        </Link>
+        <Link to="/dashboard">
+          <div className='flex flex-col items-center'>
+            <ChartNoAxesColumnIncreasing className='w-5 h-5 hover:text-[#2563EB]' />
+            <p className='text-xs'>REPORTS</p>
+          </div>
+        </Link>
+      </div>
+
+      <div className='flex items-center space-x-4'>
+        <button className='relative'>
+          <Bell className='w-5 h-5 hover:text-[#2563EB]' />
+          <span className='absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1'>
+            3
+          </span>
+        </button>
+
+        <div className='relative'>
+          <button onClick={() => setDropdownOpen(!isDropdownOpen)} className='flex items-center space-x-1'>
+            <CircleUser className='w-5 h-5' />
+          </button>
+          {isDropdownOpen && (
+            <div className='absolute right-0 w-36 mt-2 bg-white shadow-lg rounded-md p-2'>
+              <div className='flex gap-2 items-center'>
+                <CircleUser className='w-8 h-8 text-[#2563EB]' />
+                <div className='flex flex-col'>
+                  <p className='text-xs'>HEY,</p>
+                  <p className='text-sm'>{user?.name || "User"}</p>
+                </div>
+              </div>
+              <hr className='mt-2' />
+              <div className='flex flex-col items-center'>
+                <Link to="/settings" className='block px-4 py-2'>
+                  <button className='px-2 py-1 font-medium hover:bg-[#2563EB] hover:text-white rounded-md flex items-center gap-1 cursor-pointer'>
+                    <Settings className='w-5 h-5' />
+                    <span>SETTINGS</span>
+                  </button>
+                </Link>
+                <Link to="/" className='block px-4 py-2'>
+                  <button onClick={handleLogout} className='px-2 py-1 font-medium hover:bg-red-500 hover:text-white rounded-md flex items-center gap-1 cursor-pointer'>
+                    <LogOut className='w-5 h-5' />
+                    <span>LOGOUT</span>
+                  </button>
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </nav>
+  )
+}
+
+export default Navbar
