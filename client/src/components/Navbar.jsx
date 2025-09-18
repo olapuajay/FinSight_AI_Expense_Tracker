@@ -34,12 +34,12 @@ function Navbar() {
             <p className='text-xs'>DASHBOARD</p>
           </div>
         </Link>
-        <Link to="/dashboard">
+        <button onClick={() => setModalOpen(true)}>
           <div className='flex flex-col items-center'>
             <CirclePlus className='w-5 h-5 hover:text-[#2563EB]' />
             <p className='text-xs'>ADD EXPENSE</p>
           </div>
-        </Link>
+        </button>
         <Link to="/dashboard">
           <div className='flex flex-col items-center'>
             <List className='w-5 h-5 hover:text-[#2563EB]' />
@@ -83,17 +83,16 @@ function Navbar() {
                     <span>SETTINGS</span>
                   </button>
                 </Link>
-                <Link to="/" className='block px-4 py-2'>
-                  <button onClick={handleLogout} className='px-2 py-1 font-medium hover:bg-red-500 hover:text-white rounded-md flex items-center gap-1 cursor-pointer'>
-                    <LogOut className='w-5 h-5' />
-                    <span>LOGOUT</span>
-                  </button>
-                </Link>
+                <button onClick={handleLogout} className='px-2 py-1 font-medium hover:bg-red-500 hover:text-white rounded-md flex items-center gap-1 cursor-pointer'>
+                  <LogOut className='w-5 h-5' />
+                  <span>LOGOUT</span>
+                </button>
               </div>
             </div>
           )}
         </div>
       </div>
+      <AddExpenseModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} />
     </nav>
   )
 }
