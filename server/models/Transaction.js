@@ -18,7 +18,7 @@ const transactionSchema = new mongoose.Schema(
 
     recurring: {
       isRecurring: { type: Boolean, default: false },
-      frequency: { type: String, enum: ["daily", "weekly", "monthly"], default: null },
+      frequency: { type: String, enum: ["daily", "weekly", "monthly"], default: "monthly", required: function() { return this.isRecurring; }  },
       endDate: { type: Date, default: null },
       status: { type: String, enum: ["active", "paused", "cancelled"], default: "active" },
     },

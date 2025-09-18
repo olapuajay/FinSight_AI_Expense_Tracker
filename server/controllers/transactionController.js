@@ -276,43 +276,47 @@ export const uploadReceipt = async (req, res) => {
       }
     }
 
-    const parsedDate = date ? new Date(date) : new Date();
-    if(isNaN(parsedDate)) {
-      return res.status(400).json({ message: "Invalid date extracted from the receipt" });
-    }
+    // const parsedDate = date ? new Date(date) : new Date();
+    // if(isNaN(parsedDate)) {
+    //   return res.status(400).json({ message: "Invalid date extracted from the receipt" });
+    // }
 
-    const newTransaction = await transactionModel.create({
-      userId,
-      type,
-      category,
-      amount: Number(amount),
-      date: parsedDate,
-      payment,
-      note
+    // const newTransaction = await transactionModel.create({
+    //   userId,
+    //   type,
+    //   category,
+    //   amount: Number(amount),
+    //   date: parsedDate,
+    //   payment,
+    //   note
+    // });
+
+    // if(type === "expense") {
+    //   const month = Number(parsedDate.getMonth() + 1);
+    //   const year = Number(parsedDate.getFullYear());
+  
+    //   let budget = await budgetModel.findOne({ userId, month, year });
+  
+    //   if(!budget) {
+    //     budget = await budgetModel.create({
+    //       userId,
+    //       month,
+    //       year,
+    //       limit: 0,
+    //       spent: 0,
+    //     });
+    //   }
+  
+    //   budget.spent += Number(amount);
+    //   updateCategorySpent(budget, category, Number(amount));
+    //   await budget.save();
+    // }
+
+    res.status(200).json({ 
+      message: "Processed receipt successfully", 
+      extracted: { type, category, amount, date, payment, note }
     });
-
-    if(type === "expense") {
-      const month = Number(parsedDate.getMonth() + 1);
-      const year = Number(parsedDate.getFullYear());
-  
-      let budget = await budgetModel.findOne({ userId, month, year });
-  
-      if(!budget) {
-        budget = await budgetModel.create({
-          userId,
-          month,
-          year,
-          limit: 0,
-          spent: 0,
-        });
-      }
-  
-      budget.spent += Number(amount);
-      updateCategorySpent(budget, category, Number(amount));
-      await budget.save();
-    }
-
-    res.status(201).json({ message: "Processed receipt successfully", newTransaction });
+    
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error processing receipt" });

@@ -21,8 +21,8 @@ export const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         currency: user.currency,
-        token: generateToken(user._id),
       },
+      token: generateToken(user._id),
     });
   } catch (error) {
     console.log(error);
@@ -51,8 +51,8 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         currency: user.currency,
-        token: generateToken(user._id),
       },
+      token: generateToken(user._id),
     });
   } catch (error) {
     console.log(error);
