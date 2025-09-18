@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTransaction, uploadReceipt } from '../redux/slices/transactionSlices';
 import { Banknote, CloudUpload } from "lucide-react";
+import { useEffect } from 'react';
 
 const AddExpenseModal = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.transactions);
+  const { loading, extracted } = useSelector((state) => state.transactions);
 
   const [form, setForm] = useState({
     amount: "",
@@ -22,6 +23,16 @@ const AddExpenseModal = ({ isOpen, onClose }) => {
   });
 
   const [receipt, setReceipt] = useState(null);
+  const [preview, setPreview] = useState(null);
+
+  useEffect(() => {
+    if(extracted) {
+      setForm((prev) => ({
+        ...prev,
+        ...extracted,
+      }));
+    }
+  }, [extracted]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -41,9 +52,20 @@ const AddExpenseModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleFileUpload = (e) => {
-    setReceipt(e.target.files[0]);
-  }
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if(file) {
+      setReceipt(file);
+      setPreview(URL.createObjectURL(file));
+      await dispatch(uploadReceipt(file));
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if(preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -198,6 +220,12 @@ const AddExpenseModal = ({ isOpen, onClose }) => {
                 className="hidden"
               />
             </label>
+
+            {preview && (
+              <div className='mt-3 flex justify-center'>
+                <img src={preview} alt="Receipt Preview" className='w-56 h-full rounded-md border' />
+              </div>
+            )}
 
           </div>
           <div className='flex justify-center space-x-2'>
