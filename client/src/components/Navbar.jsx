@@ -72,7 +72,7 @@ function Navbar() {
                 <CircleUser className='w-8 h-8 text-[#2563EB]' />
                 <div className='flex flex-col'>
                   <p className='text-xs'>HEY,</p>
-                  <p className='text-sm'>{user?.name || "User"}</p>
+                  <p className='text-sm'>{user?.name.length >= 14 ? user?.name.split(" ")[0] || "User" : user?.name || "User"}</p>
                 </div>
               </div>
               <hr className='mt-2' />
