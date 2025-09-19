@@ -23,6 +23,7 @@ const budgetSchema = new mongoose.Schema(
     year: { type: Number, required: true },
     limit: { type: Number, required: true },
     spent: { type: Number, default: 0 },
+    targetSavings: { type: Number, default: 0 },
     categoryBudgets: [categoryBudgetSchema],
   }, { timestamps: true }
 );

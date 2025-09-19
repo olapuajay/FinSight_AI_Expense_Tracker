@@ -46,6 +46,7 @@ export const addTransaction = async (req, res) => {
           year,
           limit: 0,
           spent: 0,
+          targetSavings: 0,
           categoryBudgets: [],
         });
       }

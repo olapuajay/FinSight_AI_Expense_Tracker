@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-export async function askGemini(prompt, model = "gemini-1.5-flash") {
+export async function askGemini(prompt, model = "gemini-2.5-flash") {
   if (!genAI) {
     throw new Error("Gemini AI not properly initialized - check your API key");
   }
@@ -19,7 +19,7 @@ export async function askGemini(prompt, model = "gemini-1.5-flash") {
 }
 
 export async function extractTransactionFromReceipt(receiptBase64, mimeType) {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const prompt = `
   You are an expense tracker assistant.

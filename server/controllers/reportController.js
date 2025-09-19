@@ -10,7 +10,7 @@ export const getMonthlySummary = async (req, res) => {
     const end = new Date(year, month, 1);
 
     const transactions = await transactionModel.find({
-      user: userId,
+      userId: userId,
       date: { $gte: start, $lt: end },
     });
 
@@ -18,7 +18,7 @@ export const getMonthlySummary = async (req, res) => {
     const lastEnd = new Date(year, month - 1, 1);
 
     const lastTransactions = await transactionModel.find({
-      user: userId,
+      userId: userId,
       date: { $gte: lastStart, $lt: lastEnd },
     });
 
@@ -49,21 +49,19 @@ export const getMonthlySummary = async (req, res) => {
     if (budget && budget.categoryBudgets.length > 0) {
       for (let cat of budget.categoryBudgets) {
         const spentFromTx = transactions
-          .filter(t => t.type === "expense" && t.category === cat.category)
+          .filter(t => t.type === "expense" && t.category.toLowerCase() === cat.category.toLowerCase())
           .reduce((acc, t) => acc + t.amount, 0);
 
-        const actualSpent = spentFromTx > 0 ? spentFromTx : (cat.spent || 0);
+        const actualSpent = spentFromTx;
 
-        if (spentFromTx === 0 && actualSpent > 0) {
-          totalExpense += actualSpent;
-        }
-
-        const percentUsed = (actualSpent / cat.categoryLimit) * 100;
+        const percentUsed = cat.categoryLimit
+          ? Math.min((actualSpent / cat.categoryLimit) * 100, 100)
+          : 0;
 
         categoryBreakdown[cat.category] = {
           spent: actualSpent,
           limit: cat.categoryLimit,
-          percent: Math.min(percentUsed, 100),
+          percent: percentUsed,
         };
 
         if (percentUsed >= 100) budgetSummary.overLimit++;
@@ -99,12 +97,20 @@ export const getMonthlySummary = async (req, res) => {
         ? (((totalExpense - lastExpense) / lastExpense) * 100).toFixed(2)
         : "N/A";
 
-    const savings = totalIncome - totalExpense;
-    const lastSavings = lastIncome - lastExpense;
+    const savings = totalExpense;
+    const lastSavings = lastExpense;
+
+    // Change from last month
     const savingsChange =
       Math.abs(lastSavings) > 0
         ? (((savings - lastSavings) / Math.abs(lastSavings)) * 100).toFixed(2)
         : "N/A";
+
+    // Target savings from budget (optional)
+    const targetSavings = budget?.targetSavings || 0;
+    const savingsPercent = targetSavings
+      ? ((totalExpense / targetSavings) * 100).toFixed(2)
+      : 0;
 
     const avgDailySpend = (
       totalExpense / new Date(year, month, 0).getDate()
@@ -207,7 +213,7 @@ export const getMonthlySummary = async (req, res) => {
 
       Provide at least 3 clear, actionable financial insights in plain text.
     `;
-    const aiAdvice = await askGemini(aiPrompt);
+    // const aiAdvice = await askGemini(aiPrompt);
 
     // --- Response ---
     res.status(200).json({
@@ -222,7 +228,7 @@ export const getMonthlySummary = async (req, res) => {
               ).toFixed(2),
             }
           : { total: 0, percentRemaining: "0" },
-        savingsRate: { amount: savings, change: savingsChange },
+        savingsRate: { amount: savings, target: targetSavings, percent: savingsPercent, change: savingsChange },
         budgetSummary,
         categoryBreakdown,
         dailyTrend,
@@ -244,7 +250,7 @@ export const getMonthlySummary = async (req, res) => {
         categoryBreakdown,
         incomeVsExpense: { income: totalIncome, expense: totalExpense },
       },
-      aiAdvice,
+      // aiAdvice,
     });
   } catch (error) {
     console.log(error);

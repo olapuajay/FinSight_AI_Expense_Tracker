@@ -7,6 +7,10 @@ function calculateBudgetInsights(budget) {
   if(overallPercentage >= 100) overallAlert = "Budget exceeded!";
   else if(overallPercentage >= 80) overallAlert = "Warning: 80% budget used";
 
+  const savingsPercent = budget.targetSavings
+    ? ((budget.spent / budget.targetSavings) * 100).toFixed(2)
+    : 0;
+
   const categoryAlerts = budget.categoryBudgets.map(cat => {
     const percentage = (cat.spent / cat.categoryLimit) * 100;
     let alert = "Within budget";
@@ -31,13 +35,14 @@ function calculateBudgetInsights(budget) {
       percentage: Math.round(overallPercentage) + "%",
       alert: overallAlert,
     },
+    savingsTargetPercent: savingsPercent + "%",
     categoryAlerts,
   };
 }
 
 export const setBudget = async (req, res) => {
   try {
-    const { userId, month, year, limit, categoryBudgets } = req.body;
+    const { userId, month, year, limit, categoryBudgets, targetSavings } = req.body;
 
     const existingBudget = await budgetModel.findOne({ 
       userId, 
@@ -54,7 +59,8 @@ export const setBudget = async (req, res) => {
       month: Number(month), 
       year: Number(year), 
       limit,
-      spent: 0, 
+      spent: 0,
+      targetSavings: targetSavings || 0,
       categoryBudgets: categoryBudgets?.map(cat => ({ ...cat, spent: 0 })) || [], 
     });
     res.status(201).json({ message: "Budget set successfully", budget });
@@ -87,12 +93,13 @@ export const getBudget = async (req, res) => {
 
 export const updateBudget = async (req, res) => {
   try {
-    const { limit, categoryBudgets } = req.body;
+    const { limit, categoryBudgets, targetSavings } = req.body;
     const { id } = req.params;
 
     const updateFields = {};
     if(limit) updateFields.limit = limit;
     if(categoryBudgets) updateFields.categoryBudgets = categoryBudgets;
+    if(targetSavings !== undefined) updateFields.targetSavings = targetSavings;
 
     const budget = await budgetModel.findByIdAndUpdate(id, updateFields, { new: true });
     if(!budget) {
