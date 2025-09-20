@@ -412,12 +412,39 @@ export const getAiInsights = async (req, res) => {
       Income: ${totalIncome}, Expense: ${totalExpense}, Savings: ${savings}
       Category Breakdown: ${JSON.stringify(categoryBreakdown)}
 
-      Provide at least 3 clear, actionable financial insights in plain text.
+      Provide exactly 3 concise, actionable financial insights. 
+      Each insight should be **1-2 sentences max**, clear and easy to read. 
+      Use simple language and focus on practical advice the user can act on immediately.
+
+      Return ONLY valid JSON in this format:
+      {
+        "insights": [
+          "First insight...",
+          "Second insight...",
+          "Third insight...",
+        ]
+      }
     `;
 
-    const aiAdvice = await askGemini(aiPrompt);
+    const aiResponse = await askGemini(aiPrompt);
 
-    res.status(200).json({ insights: aiAdvice });
+    let insights = [];
+    try {
+      const cleaned = aiResponse
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      const parsed = JSON.parse(cleaned);
+      insights = parsed.insights || [];
+    } catch (error) {
+      insights = aiResponse
+        .split("\n")
+        .map(line => line.trim())
+        .filter(line => line.length > 0 && !/^\d+\.$/.test(line));
+    }
+
+    res.status(200).json({ insights });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something went wrong" });
