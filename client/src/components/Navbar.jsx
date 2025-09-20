@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/slices/authSlice';
-import { Bell, CircleUser, House, CirclePlus, List, ChartNoAxesColumnIncreasing, Settings, LogOut } from "lucide-react";
+import { Bell, CircleUser, House, CirclePlus, List, ChartNoAxesColumnIncreasing, Settings, LogOut, Menu, X } from "lucide-react";
 import logo from "../assets/logo.png";
 
 import AddExpenseModal from "./AddExpenseModal";
@@ -14,6 +14,7 @@ function Navbar() {
 
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -21,7 +22,7 @@ function Navbar() {
   }
 
   return (
-    <nav className='bg-white shadow-md md:px-16 md:py-3 px-2 py-2 flex items-center justify-between'>
+    <nav className='relative bg-white shadow-md md:px-16 md:py-3 px-2 py-2 flex items-center justify-between'>
       <div className='inline-flex items-center'>
         <img src={logo} className='md:w-15 w-10 h-full' alt="" />
         <h1 className='md:font-bold font-semibold md:text-2xl text-lg text-[#2563EB]'>FinSight</h1>
@@ -91,7 +92,33 @@ function Navbar() {
             </div>
           )}
         </div>
+
+        <button className='md:hidden' onClick={() => setMenuOpen(!menuOpen)}>
+          {menuOpen ? <X className='w-6 h-6' /> : <Menu className='w-6 h-6' />}
+        </button>
       </div>
+
+      {menuOpen && (
+        <div className='absolute top-full left-0 w-full bg-white shadow-md md:hidden z-40'>
+          <Link to="/dashboard" onClick={() => setMenuOpen(false)} className='block px-4 py-2 '>Dashboard</Link>
+          <button 
+            onClick={() => { setModalOpen(true); setMenuOpen(false); }} 
+            className='block px-4 py-2  w-full text-left'
+          >
+            Add Expense
+          </button>
+          <Link to="/dashboard" onClick={() => setMenuOpen(false)} className='block px-4 py-2 '>Expense List</Link>
+          <Link to="/dashboard" onClick={() => setMenuOpen(false)} className='block px-4 py-2 '>Reports</Link>
+          <Link to="/settings" onClick={() => setMenuOpen(false)} className='block px-4 py-2 '>Settings</Link>
+          <button 
+            onClick={handleLogout} 
+            className='block px-4 py-2 hover:bg-red-500 hover:text-white w-full text-left'
+          >
+            Logout
+          </button>
+        </div>
+      )}
+
       <AddExpenseModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} />
     </nav>
   )
