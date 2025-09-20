@@ -5,7 +5,7 @@ import { protect } from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 router.get("/summary/:userId/:month/:year", protect, getMonthlySummary);
-router.get("/trend/:userId/:month/:year/:granularity", protect, getSpendingTrend);
+router.get("/trend/:userId/:month/:year", protect, getSpendingTrend);
 router.get("/category-breakdown/:userId/:month/:year", protect, getCategoryBreakdown);
 router.get("/income-vs-expense/:userId/:month/:year", protect, getIncomeVsExpense);
 router.get("/ai-insights/:userId/:month/:year", protect, getAiInsights);

@@ -260,69 +260,50 @@ export const getMonthlySummary = async (req, res) => {
 
 export const getSpendingTrend = async (req, res) => {
   try {
-    const { userId, month, year, granularity } = req.params;
+    const { userId, month, year } = req.params;
 
-    const start = new Date(year, month - 1, 1);
-    const end = new Date(year, month, 1);
+    const refMonth = Number(month);
+    const refYear = Number(year);
 
-    const transactions = await transactionModel.find({
-      userId,
-      date: { $gte: start, $lt: end },
-    });
-
-    const daysInMonth = new Date(year, month, 0).getDate();
-
-    if(granularity === "daily") {
-      let trend = [];
-      for(let day = 1; day <= daysInMonth; day++) {
-        const dayStart = new Date(year, month - 1, day);
-        const dayEnd = new Date(year, month - 1, day + 1);
-
-        const dayTransactions = transactions.filter(
-          t => t.date >= dayStart && t.date <= dayEnd
-        );
-
-        const expense = dayTransactions
-          .filter(t => t.type === "expense")
-          .reduce((a, t) => a + t.amount, 0);
-
-        const income = dayTransactions
-          .filter(t => t.type === "income")
-          .reduce((a, t) => a + t.amount, 0);
-        
-        trend.push({ date: `${year}-${month}-${day}`, expense, income });
-      }
-
-      return res.json({ granularity, trend })
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const dt = new Date(refYear, refMonth - 1 - i, 1);
+      months.push({ month: dt.getMonth() + 1, year: dt.getFullYear() });
     }
 
-    let trend = [];
-    let weekIndex = 1;
-    for(let i = 0; i < daysInMonth; i+=7) {
-      const weekStart = new Date(year, month - 1, i + 1);
-      const weekEnd = new Date(year, month - 1, Math.min(i + 7, daysInMonth) + 1);
+    const trend = [];
 
-      const weekTransactions = transactions.filter(
-        t => t.date >= weekStart && t.date <= weekEnd
-      );
+    for (const m of months) {
+      const start = new Date(m.year, m.month - 1, 1);
+      const end = new Date(m.year, m.month, 1);
 
-      const expense = weekTransactions
-        .filter(t => t.type === "expense")
+      const txns = await transactionModel.find({
+        userId,
+        date: { $gte: start, $lt: end },
+      });
+
+      const expense = txns
+        .filter((t) => t.type === "expense")
         .reduce((a, t) => a + t.amount, 0);
 
-      const income = weekTransactions
-        .filter(t => t.type === "income")
+      const income = txns
+        .filter((t) => t.type === "income")
         .reduce((a, t) => a + t.amount, 0);
 
-      trend.push({ week: `Week ${weekIndex++}`, expense, income });
+      trend.push({
+        month: `${m.year}-${String(m.month).padStart(2, "0")}`,
+        expense,
+        income,
+      });
     }
 
-    res.json({ granularity, trend });
+    return res.json({ trend });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error generating spending trend" });
+    console.error("Error in getSpendingTrend:", error);
+    return res.status(500).json({ message: "Error generating spending trend" });
   }
-}
+};
+
 
 export const getCategoryBreakdown = async (req, res) => {
   try {
