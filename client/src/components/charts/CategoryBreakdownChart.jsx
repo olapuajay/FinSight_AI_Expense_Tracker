@@ -49,7 +49,7 @@ export default function CategoryBreakdownChart({ userId, month, year }) {
     return (
       <div className="bg-white rounded-2xl p-6 shadow-lg w-full">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-semibold text-gray-800">Category Breakdown</h3>
+          <h3 className="md:text-lg text-md font-semibold text-gray-800">Category Breakdown</h3>
         </div>
         <div className="h-64 bg-gray-100 animate-pulse rounded-lg"></div>
       </div>
@@ -59,7 +59,7 @@ export default function CategoryBreakdownChart({ userId, month, year }) {
   return (
     <div className="bg-white rounded-2xl p-6 shadow-lg w-full">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold text-gray-800">Category Breakdown</h3>
+        <h3 className="md:text-lg text-md font-semibold text-gray-800">Category Breakdown</h3>
         <p className="text-sm text-gray-500">Monthly Expenses</p>
       </div>
 

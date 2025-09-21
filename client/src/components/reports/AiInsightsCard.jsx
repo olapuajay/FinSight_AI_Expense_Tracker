@@ -37,14 +37,14 @@ function AiInsightsCards({ userId, month, year }) {
   return (
     <div className='mt-4'>
       <div>
-        <h3 className="text-xl font-semibold text-gray-800">Gemini's Financial Insights</h3>
+        <h3 className="md:text-lg text-md font-semibold text-gray-800">Gemini's Financial Insights</h3>
         <p className="text-sm text-gray-500 mt-1 mb-2">AI-powered personalized financial advice</p>
       </div>
       {!loaded && (
         <div className="flex justify-center items-center py-16">
           <button
             onClick={loadInsights}
-            className="px-6 py-3 bg-[#2563EB] text-white rounded-lg font-medium shadow-md hover:from-blue-700 hover:to-blue-800 transition-all transform hover:-translate-y-0.5"
+            className="md:px-6 md:py-3 px-4 py-2 bg-[#2563EB] text-white rounded-lg font-medium shadow-md"
           >
             Generate Insights
           </button>

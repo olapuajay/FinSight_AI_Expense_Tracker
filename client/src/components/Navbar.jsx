@@ -30,26 +30,26 @@ function Navbar() {
 
       <div className='hidden md:flex space-x-8'>
         <Link to="/dashboard">
-          <div className='flex flex-col items-center'>
-            <House className='w-5 h-5 hover:text-[#2563EB]' />
+          <div className='flex flex-col items-center hover:text-[#2563EB]'>
+            <House className='w-5 h-5' />
             <p className='text-xs'>DASHBOARD</p>
           </div>
         </Link>
         <button onClick={() => setModalOpen(true)}>
-          <div className='flex flex-col items-center'>
-            <CirclePlus className='w-5 h-5 hover:text-[#2563EB]' />
+          <div className='flex flex-col items-center hover:text-[#2563EB] cursor-pointer'>
+            <CirclePlus className='w-5 h-5' />
             <p className='text-xs'>ADD EXPENSE</p>
           </div>
         </button>
         <Link to="/dashboard">
-          <div className='flex flex-col items-center'>
-            <List className='w-5 h-5 hover:text-[#2563EB]' />
+          <div className='flex flex-col items-center hover:text-[#2563EB]'>
+            <List className='w-5 h-5' />
             <p className='text-xs'>EXPENSE LIST</p>
           </div>
         </Link>
         <Link to="/dashboard">
-          <div className='flex flex-col items-center'>
-            <ChartNoAxesColumnIncreasing className='w-5 h-5 hover:text-[#2563EB]' />
+          <div className='flex flex-col items-center hover:text-[#2563EB]'>
+            <ChartNoAxesColumnIncreasing className='w-5 h-5' />
             <p className='text-xs'>REPORTS</p>
           </div>
         </Link>

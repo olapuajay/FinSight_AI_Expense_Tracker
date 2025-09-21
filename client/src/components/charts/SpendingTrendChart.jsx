@@ -56,7 +56,7 @@ export default function SpendingTrendChart({ userId, month, year }) {
   return (
     <div className="bg-white rounded-2xl p-4 shadow w-full">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">Spending Trend</h3>
+        <h3 className="md:text-lg text-md font-semibold text-gray-800">Spending Trend</h3>
         <p className="text-sm text-gray-500">Last 6 months</p>
       </div>
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTransaction, uploadReceipt } from '../redux/slices/transactionSlices';
-import { Banknote, CloudUpload } from "lucide-react";
+import { Banknote, CloudUpload, X } from "lucide-react";
 import { useEffect } from 'react';
 
 const AddExpenseModal = ({ isOpen, onClose }) => {
@@ -117,6 +117,7 @@ const AddExpenseModal = ({ isOpen, onClose }) => {
   return (
     <div className='fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50'>
       <div className='bg-white rounded-lg shadow-lg w-full max-w-lg p-6 max-h-screen overflow-y-auto'>
+        <X onClick={onClose} className='text-white bg-black rounded-full p-1 h-6 w-6' />
         <div className='flex flex-col items-center'>
           <Banknote className='h-8 w-8 text-[#2563EB]' />
           <h2 className='text-xl font-bold mb-4'>Add Transaction</h2>

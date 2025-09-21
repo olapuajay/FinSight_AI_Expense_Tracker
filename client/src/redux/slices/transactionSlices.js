@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { addTransactionAPI, uploadReceiptAPI } from "../../api/transaction";
+import { addTransactionAPI, uploadReceiptAPI, getTransactionsAPI } from "../../api/transaction";
 
 export const addTransaction = createAsyncThunk(
   "transaction/add",
@@ -18,6 +18,18 @@ export const uploadReceipt = createAsyncThunk(
   async (file, { rejectWithValue }) => {
     try {
       const { data } = await uploadReceiptAPI(file);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+export const fetchTransactions = createAsyncThunk(
+  "transaction/fetchAll",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await getTransactionsAPI();
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -58,6 +70,18 @@ export const transactionSlice = createSlice({
         state.extracted = action.payload.extracted;
       })
       .addCase(uploadReceipt.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchTransactions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchTransactions.fulfilled, (state, action) => {
+        state.loading = false;
+        state.transactions = action.payload;
+      })
+      .addCase(fetchTransactions.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

@@ -6,6 +6,7 @@ import CategoryBreakdownChart from "../components/charts/CategoryBreakdownChart"
 import { fetchSpendingTrend, fetchCategoryBreakdown } from "../api/charts";
 import { useSelector } from "react-redux";
 import AiInsightsCard from "../components/reports/AiInsightsCard";
+import RecentTransactionTable from "../components/dashboard/RecentTransactionTable";
 
 function Dashboard() {
   const { user } = useSelector((state) => state.auth);
@@ -24,6 +25,7 @@ function Dashboard() {
           <CategoryBreakdownChart userId={user._id} month={month} year={year} />
         </div>
         <AiInsightsCard userId={user._id} month={month} year={year} />
+        <RecentTransactionTable />
       </div>
     </div>
   )

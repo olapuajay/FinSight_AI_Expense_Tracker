@@ -11,3 +11,5 @@ export const uploadReceiptAPI = (file) => {
     headers: { "Content-Type": "multipart/form-data" },
   });
 };
+
+export const getTransactionsAPI = () => API.get("transactions");
