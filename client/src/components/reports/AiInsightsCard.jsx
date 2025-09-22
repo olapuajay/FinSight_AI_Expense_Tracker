@@ -6,10 +6,10 @@ import { motion } from "framer-motion";
 function AiInsightsCards({ userId, month, year }) {
   const [insights, setInsights] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [loaded, setLoaded] = useState(false); // track if insights were already loaded
+  const [loaded, setLoaded] = useState(false);
 
   const loadInsights = async () => {
-    if (!userId || loaded) return; // prevent repeated fetches
+    if (!userId || loaded) return;
     try {
       setLoading(true);
       const data = await fetchAiInsights(userId, month, year);
@@ -25,7 +25,7 @@ function AiInsightsCards({ userId, month, year }) {
       }
 
       setInsights(insightsData);
-      setLoaded(true); // mark as loaded to prevent refetch
+      setLoaded(true);
     } catch (error) {
       console.log("Error fetching AI insights:", error);
       setInsights([]);
@@ -80,8 +80,8 @@ function AiInsightsCards({ userId, month, year }) {
                   <h3 className="md:text-lg text-sm font-semibold text-[#111827]">
                     Insight {idx + 1}
                   </h3>
-                  <div className="md:text-4xl text-2xl text-[#2563EB] p-1 bg-white border-2 rounded-lg">
-                    <Sparkles />
+                  <div className="text-[#2563EB] p-1 bg-white border-2 rounded-lg">
+                    <Sparkles className='h-5 w-5' />
                   </div>
                 </div>
                 <p className="md:text-sm text-xs text-[#6B7280] mt-2">

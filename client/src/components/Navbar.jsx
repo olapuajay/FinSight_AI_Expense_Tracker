@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/slices/authSlice';
+import { motion } from 'framer-motion';
 import { Bell, CircleUser, House, CirclePlus, List, ChartNoAxesColumnIncreasing, Settings, LogOut, Menu, X } from "lucide-react";
 import logo from "../assets/logo.png";
 
@@ -47,7 +48,7 @@ function Navbar() {
             <p className='text-xs'>EXPENSE LIST</p>
           </div>
         </Link>
-        <Link to="/dashboard">
+        <Link to="/reports">
           <div className='flex flex-col items-center hover:text-[#2563EB]'>
             <ChartNoAxesColumnIncreasing className='w-5 h-5' />
             <p className='text-xs'>REPORTS</p>
@@ -63,7 +64,7 @@ function Navbar() {
           </span>
         </button>
 
-        <div className='relative'>
+        <div className='relative hidden md:block'>
           <button onClick={() => setDropdownOpen(!isDropdownOpen)} className='flex items-center space-x-1'>
             <CircleUser className='w-5 h-5' />
           </button>
@@ -99,24 +100,84 @@ function Navbar() {
       </div>
 
       {menuOpen && (
-        <div className='absolute top-full left-0 w-full bg-white shadow-md md:hidden z-40'>
-          <Link to="/dashboard" onClick={() => setMenuOpen(false)} className='block px-4 py-2 '>Dashboard</Link>
-          <button 
-            onClick={() => { setModalOpen(true); setMenuOpen(false); }} 
-            className='block px-4 py-2  w-full text-left'
-          >
-            Add Expense
-          </button>
-          <Link to="/expense-list" onClick={() => setMenuOpen(false)} className='block px-4 py-2 '>Expense List</Link>
-          <Link to="/dashboard" onClick={() => setMenuOpen(false)} className='block px-4 py-2 '>Reports</Link>
-          <Link to="/settings" onClick={() => setMenuOpen(false)} className='block px-4 py-2 '>Settings</Link>
-          <button 
-            onClick={handleLogout} 
-            className='block px-4 py-2 hover:bg-red-500 hover:text-white w-full text-left'
-          >
-            Logout
-          </button>
-        </div>
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+          className='absolute top-full left-0 w-full bg-white shadow-lg border-t border-gray-100 md:hidden z-40'
+        >
+          <div className='flex items-center px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100'>
+            <div className='flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 mr-3'>
+              <CircleUser className='h-6 w-6 text-blue-600' />
+            </div>
+            <div className='flex flex-col'>
+              <p className='text-xs text-blue-600 font-medium'>HEY,</p>
+              <p className='text-sm font-semibold text-gray-800'>
+                {user?.name && user.name.length >= 14 
+                  ? user.name.split(" ")[0] || "User" 
+                  : user?.name || "User"
+                }
+              </p>
+            </div>
+          </div>
+
+          <div className='py-2'>
+            <Link 
+              to="/dashboard" 
+              onClick={() => setMenuOpen(false)}
+              className='flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group'
+            >
+              <House className='h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-600' />
+              Dashboard
+            </Link>
+
+            <button 
+              onClick={() => { setModalOpen(true); setMenuOpen(false); }}
+              className='flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group w-full text-left'
+            >
+              <CirclePlus className='h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-600' />
+              Add Expense
+            </button>
+
+            <Link 
+              to="/expense-list" 
+              onClick={() => setMenuOpen(false)}
+              className='flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group'
+            >
+              <List className='h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-600' />
+              Expense List
+            </Link>
+
+            <Link 
+              to="/reports" 
+              onClick={() => setMenuOpen(false)}
+              className='flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group'
+            >
+              <ChartNoAxesColumnIncreasing className='h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-600' />
+              Reports
+            </Link>
+
+            <Link 
+              to="/settings" 
+              onClick={() => setMenuOpen(false)}
+              className='flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 group'
+            >
+              <Settings className='h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-600' />
+              Settings
+            </Link>
+
+            <div className='border-t border-gray-100 my-2'></div>
+
+            <button 
+              onClick={handleLogout} 
+              className='flex items-center px-6 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 group w-full text-left'
+            >
+              <LogOut className='h-5 w-5 mr-3' />
+              Logout
+            </button>
+          </div>
+        </motion.div>
       )}
 
       <AddExpenseModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} />

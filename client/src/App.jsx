@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Signup";
 import Dashboard from "./pages/Dashboard"; 
 import ExpenseList from "./pages/ExpenseList";
+import Reports from "./pages/Reports";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
 
         <Route path="/dashboard" element={<ProtectedRoutes> <Dashboard /> </ProtectedRoutes>} />
         <Route path="/expense-list" element={<ProtectedRoutes> <ExpenseList /> </ProtectedRoutes>} />
+        <Route path="/reports" element={<ProtectedRoutes> <Reports /> </ProtectedRoutes>} />
       </Routes>
     </Router>
   )
