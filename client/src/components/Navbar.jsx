@@ -23,10 +23,10 @@ function Navbar() {
 
   return (
     <nav className='relative bg-white shadow-md md:px-16 md:py-3 px-2 py-2 flex items-center justify-between'>
-      <div className='inline-flex items-center'>
+      <Link to="/dashboard" className='inline-flex items-center'>
         <img src={logo} className='md:w-15 w-10 h-full' alt="" />
         <h1 className='md:font-bold font-semibold md:text-2xl text-lg text-[#2563EB]'>FinSight</h1>
-      </div>
+      </Link>
 
       <div className='hidden md:flex space-x-8'>
         <Link to="/dashboard">
@@ -41,7 +41,7 @@ function Navbar() {
             <p className='text-xs'>ADD EXPENSE</p>
           </div>
         </button>
-        <Link to="/dashboard">
+        <Link to="/expense-list">
           <div className='flex flex-col items-center hover:text-[#2563EB]'>
             <List className='w-5 h-5' />
             <p className='text-xs'>EXPENSE LIST</p>
@@ -107,7 +107,7 @@ function Navbar() {
           >
             Add Expense
           </button>
-          <Link to="/dashboard" onClick={() => setMenuOpen(false)} className='block px-4 py-2 '>Expense List</Link>
+          <Link to="/expense-list" onClick={() => setMenuOpen(false)} className='block px-4 py-2 '>Expense List</Link>
           <Link to="/dashboard" onClick={() => setMenuOpen(false)} className='block px-4 py-2 '>Reports</Link>
           <Link to="/settings" onClick={() => setMenuOpen(false)} className='block px-4 py-2 '>Settings</Link>
           <button 

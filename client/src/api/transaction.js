@@ -13,3 +13,7 @@ export const uploadReceiptAPI = (file) => {
 };
 
 export const getTransactionsAPI = () => API.get("transactions");
+
+export const deleteTransactionAPI = (id) => API.delete(`transactions/${id}`);
+
+export const updateTransactionAPI = (id, updatedData) => API.put(`transactions/${id}`, updatedData);

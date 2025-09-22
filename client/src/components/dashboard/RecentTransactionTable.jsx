@@ -76,7 +76,7 @@ const RecentTransactionsTable = () => {
 
       <div className="flex justify-end mt-4">
         <button
-          onClick={() => navigate("/expenses")}
+          onClick={() => navigate("/expense-list")}
           className="text-[#2563EB] hover:underline text-xs md:text-sm font-medium"
         >
           Show More →
