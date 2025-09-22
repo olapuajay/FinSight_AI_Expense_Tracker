@@ -342,25 +342,37 @@ export const getCategoryBreakdown = async (req, res) => {
 
 export const getIncomeVsExpense = async (req, res) => {
   try {
-    const { userId, month, year } = req.params;
+    const { userId } = req.params;
+    const now = new Date();
 
-    const start = new Date(year, month - 1, 1);
-    const end = new Date(year, month, 1);
+    const results = [];
 
-    const transactions = await transactionModel.find({
-      userId,
-      date: { $gte: start, $lt: end },
-    });
+    for(let i = 5; i >= 0; i--) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() - i);
+      const start = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+      const end = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 1);
 
-    const totalExpense = transactions
-      .filter(t => t.type === "expense")
-      .reduce((a, t) => a + t.amount, 0);
+      const transactions = await transactionModel.find({
+        userId,
+        date: { $gte: start, $lt: end },
+      });
 
-    const totalIncome = transactions
-      .filter(t => t.type === "income")
-      .reduce((a, t) => a + t.amount, 0);
+      const totalExpense = transactions
+        .filter(t => t.type === "expense")
+        .reduce((a, t) => a + t.amount, 0);
+  
+      const totalIncome = transactions
+        .filter(t => t.type === "income")
+        .reduce((a, t) => a + t.amount, 0);
 
-    res.json({ income: totalIncome, expense: totalExpense });
+      results.push({
+        month: start.toLocaleString("default", { month: "short" }),
+        income: totalIncome,
+        expense: totalExpense,
+      });
+    }
+
+    res.json(results);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error generating income vs expense" });
