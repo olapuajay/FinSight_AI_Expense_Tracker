@@ -8,7 +8,7 @@ export const getUserProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(user);
+    res.status(200).json({ user });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something went wrong" });
@@ -32,6 +32,13 @@ export const updateUserProfile = async (req, res) => {
       user.password = hashedPassword;
     }
 
+    if(req.body.notificationPreferences) {
+      user.notificationPreferences = {
+        ...user.notificationPreferences.toObject(),
+        ...req.body.notificationPreferences,
+      };
+    }
+
     const updatedUser = await user.save();
 
     res.status(200).json({
@@ -41,6 +48,7 @@ export const updateUserProfile = async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email,
         currency: updatedUser.currency,
+        notificationPreferences: updatedUser.notificationPreferences,
       },
     });
   } catch (error) {

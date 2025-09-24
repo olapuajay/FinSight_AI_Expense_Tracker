@@ -6,6 +6,15 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     currency: { type: String, default: "INR" },
     profilePic: { type: String, default: "" },
+
+    notificationPreferences: {
+      budgetAlerts: { type: Boolean, default: true },
+      aiInsights: {
+        enabled: { type: Boolean, default: true },
+        frequency: { type: String, enum: ["daily", "weekly"], default: "daily" },
+      },
+      reminders: { type: Boolean, default: true },
+    },
   }, { timestamps: true }
 );
 

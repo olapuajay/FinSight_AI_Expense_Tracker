@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { login, signup, getProfile } from "../../api/auth";
+import { login, signup } from "../../api/auth";
 
 const storedUser = localStorage.getItem("user")
   ? JSON.parse(localStorage.getItem("user")) : null;
@@ -36,16 +36,6 @@ export const signupUser = createAsyncThunk("auth/register", async (userData, { r
   }
 });
 
-export const fetchProfile = createAsyncThunk("user/me", async (__, { rejectWithValue }) => {
-  try {
-    const { data } = await getProfile();
-    localStorage.setItem("user", JSON.stringify(data.user));
-
-    return data.user;
-  } catch (error) {
-    return rejectWithValue(error.response.data.message);
-  }
-});
 
 const authSlices = createSlice({
   name: "auth",
@@ -87,9 +77,6 @@ const authSlices = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(fetchProfile.fulfilled, (state, action) => {
-        state.user = action.payload;
-      });
   },
 });
 
