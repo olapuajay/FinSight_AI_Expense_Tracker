@@ -3,19 +3,22 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/slices/authSlice';
 import { motion } from 'framer-motion';
-import { Bell, CircleUser, House, CirclePlus, List, ChartNoAxesColumnIncreasing, Settings, LogOut, Menu, X } from "lucide-react";
+import { Bell, CircleUser, House, CirclePlus, List, ChartNoAxesColumnIncreasing, Settings, LogOut, Menu, X, Satellite } from "lucide-react";
 import logo from "../assets/logo.png";
 
 import AddExpenseModal from "./AddExpenseModal";
+import NotificationsModal from './NotificationsModal';
 
 function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
+  const { unreadCount } = useSelector((state) => state.notifications);
 
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -56,12 +59,14 @@ function Navbar() {
         </Link>
       </div>
 
-      <div className='flex items-center space-x-4'>
-        <button className='relative'>
+      <div className='flex items-center space-x-4 relative'>
+        <button onClick={() => setOpen(true)} className='relative'>
           <Bell className='w-5 h-5 hover:text-[#2563EB]' />
-          <span className='absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1'>
-            3
-          </span>
+          {unreadCount > 0 && (
+            <span className='absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1'>
+              {unreadCount}
+            </span>
+          )}
         </button>
 
         <div className='relative hidden md:block'>
@@ -98,6 +103,8 @@ function Navbar() {
           {menuOpen ? <X className='w-6 h-6' /> : <Menu className='w-6 h-6' />}
         </button>
       </div>
+
+      {open && <NotificationsModal onClose={() => setOpen(false)} />}
 
       {menuOpen && (
         <motion.div 

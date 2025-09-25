@@ -5,6 +5,9 @@ import dashboardReducer from "./slices/dashboardSlice";
 import reportReducer from "./slices/reportSlice";
 import profileReducer from "./slices/profileSlice";
 import budgetReducer from "./slices/budgetSlice";
+import notificationSettingsReducer from "./slices/notificationSettingsSlice";
+import notificationReducer from "./slices/notificationSlice";
+
 
 const store = configureStore({
   reducer: {
@@ -12,8 +15,10 @@ const store = configureStore({
     transactions: transactionReducer,
     dashboard: dashboardReducer,
     reports: reportReducer,
+    notificationSettings: notificationSettingsReducer,
     profile: profileReducer,
     budget: budgetReducer,
+    notifications: notificationReducer,
   },
 });
 
