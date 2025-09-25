@@ -5,10 +5,14 @@ let io;
 
 export const initSocket = (server) => {
   io = new Server(server, {
-    cors: { origin: "*", methods: ["GET", "POST"] },
+    cors: { 
+      origin: "http://localhost:5173", 
+      methods: ["GET", "POST"] ,
+      credentials: true,
+    }
   });
   
-  io.use(protectSocket);
+  // io.use(protectSocket);
 
   io.on("connection", (socket) => {
     console.log("New client connected: ", socket.id);

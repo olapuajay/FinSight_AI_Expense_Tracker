@@ -12,13 +12,19 @@ import budgetRoutes from "./routes/budgetRoutes.js";
 import budgetInsightsRoutes from "./routes/budgetInsightsRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import notificationSettingsRoutes from "./routes/notificationSettingsRoutes.js";
 
 connectDB();
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
@@ -27,6 +33,7 @@ app.use("/api/budgets", budgetRoutes);
 app.use("/api/budget-insights", budgetInsightsRoutes);
 app.use("/api/report", reportRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/notification-settings", notificationSettingsRoutes);
 
 app.get("/", (req, res) => {
   res.send({ message: "Hello from server!" });
@@ -36,8 +43,6 @@ const port = process.env.PORT || 8001;
 const server = createServer(app);
 
 const io = initSocket(server);
-
-initSocket(server);
 
 app.set("io", io);
 

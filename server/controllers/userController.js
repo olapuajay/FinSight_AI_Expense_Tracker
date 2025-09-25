@@ -32,13 +32,6 @@ export const updateUserProfile = async (req, res) => {
       user.password = hashedPassword;
     }
 
-    if(req.body.notificationPreferences) {
-      user.notificationPreferences = {
-        ...user.notificationPreferences.toObject(),
-        ...req.body.notificationPreferences,
-      };
-    }
-
     const updatedUser = await user.save();
 
     res.status(200).json({
@@ -48,7 +41,6 @@ export const updateUserProfile = async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email,
         currency: updatedUser.currency,
-        notificationPreferences: updatedUser.notificationPreferences,
       },
     });
   } catch (error) {
