@@ -1,6 +1,7 @@
 import transactionModel from "../models/Transaction.js";
 import budgetModel from "../models/Budget.js";
 import { budgetInsights } from "../services/gemini.js";
+import Notification from "../models/Notification.js";
 
 export const getBudgetInsights = async (req, res) => {
   try {
@@ -35,7 +36,17 @@ export const getBudgetInsights = async (req, res) => {
       return res.status(400).json({ message: "No budget set for this user" });
     }
 
-    const insights = await budgetInsights(transaction, budget);
+    const insights = await budgetInsights(userId, transaction, budget);
+
+    if(insights.warnings && insights.warnings.length > 0) {
+      await Promise.all(
+        insights.warnings.map(async (warning) => {
+          await Notification.create({
+            userId, type: "budget", message: warning
+          });
+        })
+      );
+    }
 
     res.status(200).json({ success: true, range: { start, end }, insights });
   } catch (error) {

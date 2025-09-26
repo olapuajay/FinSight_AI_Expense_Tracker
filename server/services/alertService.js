@@ -3,13 +3,23 @@ import budgetModel from "../models/Budget.js";
 import notificationModel from "../models/Notification.js";
 import { askGemini } from "./gemini.js";
 import { createNotification } from "./notificationService.js";
+import notificationSettingsModel from "../models/NotificationSettings.js";
 import mongoose from "mongoose";
+
 
 export const generateAiAlerts = async () => {
   try {
     const users = await mongoose.model("User").find();
 
     for(let user of users) {
+      const settings = await notificationSettingsModel.findOne({ userId: user._id });
+      if(!settings || !settings.aiInsights?.enabled) continue;
+
+      const now = new Date();
+      if(settings.aiInsights.frequency === "weekly") {
+        if(now.getDay() !== 1 || now.getHours() !== 9) continue;
+      }
+
       const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
       const transaction = await transactionModel.find({
@@ -49,8 +59,7 @@ export const generateAiAlerts = async () => {
         .map(a => a.trim())
         .filter(a => a.length > 0);
 
-      await createNotification(user._id, "Test notification", "general");
-      
+        
       for(let msg of alerts) {
         let type = "general";
         if(msg.startsWith("[budget]")) type = "budget";

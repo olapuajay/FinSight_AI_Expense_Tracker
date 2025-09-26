@@ -1,5 +1,7 @@
 import "../config/env.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import notificationSettingsModel from "../models/NotificationSettings.js";
+import { createNotification } from "./notificationService.js";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -73,39 +75,94 @@ export async function autoCategorizeTransaction(note) {
   return await askGemini(prompt);
 }
 
-export async function budgetInsights(transaction, budget) {
-  const prompt = `
-    You are analyzing personal finance data.
-    Given these transactions: ${JSON.stringify(transaction)},
-    and monthly budget: ${JSON.stringify(budget)},
-
-    Respond with ONLY a raw JSON object. 
-    Do NOT include markdown, code fences, or any explanation. 
-    Output must be directly parsable with JSON.parse().
-
-    {
-      "totalsByCategory": { "category1": number, "category2": number, ... },
-      "warnings": [ "warning1", "warning2", ... ],
-      "tips": [ "tip1", "tip2", ... ],
+export async function budgetInsights(userId, transaction, budget) {
+  try {
+    const settings = await notificationSettingsModel.findOne({ userId });
+    if(!settings || !settings.budgetAlerts) {
+      return {
+        totalsByCategory: {},
+        warnings: {},
+        tips: [],
+      };
     }
 
-    Rules:
-    - "totalsByCategory" should be numeric totals for each category.
-    - "warnings" should contain any budget alerts (e.g., overspending, nearing limit).
-    - "tips" should be practical saving tips.
-    - If nothing to report, return empty arrays/objects.
-  `;
-
-  const response = await askGemini(prompt);
-
-  try {
+    const prompt = `
+      You are analyzing personal finance data.
+      Given these transactions: ${JSON.stringify(transaction)},
+      and monthly budget: ${JSON.stringify(budget)},
+  
+      Respond with ONLY a raw JSON object. 
+      Do NOT include markdown, code fences, or any explanation. 
+      Output must be directly parsable with JSON.parse().
+  
+      {
+        "totalsByCategory": { "category1": number, "category2": number, ... },
+        "warnings": [ "warning1", "warning2", ... ],
+        "tips": [ "tip1", "tip2", ... ],
+      }
+  
+      Rules:
+      - "totalsByCategory" should be numeric totals for each category.
+      - "warnings" should contain any budget alerts (e.g., overspending, nearing limit).
+      - "tips" should be practical saving tips.
+      - If nothing to report, return empty arrays/objects.
+    `;
+  
+    const response = await askGemini(prompt);
+    
     const cleaned = response
     .replace(/```json/g, "")
     .replace(/```/g, "")
     .trim();
-    return JSON.parse(cleaned);
+
+    let parsed = JSON.parse(cleaned);
+
+    if(!parsed.totalsByCategory) parsed.totalsByCategory = {};
+    if(!parsed.warnings) parsed.warnings = [];
+    if(!parsed.tips) parsed.tips = [];
+
+    if(budget?.monthlyBudget) {
+      const totalExpense = transaction
+        .filter(t => t.type === "expense")
+        .reduce((a, t) => a + t.amount, 0);
+
+      if(totalExpense >= 0.8 * budget.monthlyBudget) {
+        const msg = `You've already used ${(totalExpense / budget.monthlyBudget * 100).toFixed(1)}% of your monthly budget.`;
+        parsed.warnings.push(msg);
+        await createNotification(userId, msg, "budget");
+      }
+    }
+
+    if (budget?.categoryBudgets?.length) {
+      const totalsByCategory = transaction
+        .filter(t => t.type === "expense")
+        .reduce((acc, t) => {
+          acc[t.category] = (acc[t.category] || 0) + t.amount;
+          return acc;
+        }, {});
+
+      for (let catBudget of budget.categoryBudgets) {
+        const spent = totalsByCategory[catBudget.category] || 0;
+        if (spent >= 0.8 * catBudget.amount) {
+          const msg = `You've spent ${(spent / catBudget.amount * 100).toFixed(1)}% of your ${catBudget.category} budget.`;
+          parsed.warnings.push(msg);
+          await createNotification(userId, msg, "budget");
+        }
+      }
+
+      parsed.totalsByCategory = { ...parsed.totalsByCategory, ...totalsByCategory };
+    }
+
+    for(let aiWarn of parsed.warnings) {
+      if(aiWarn && aiWarn.trim()) {
+        await createNotification(userId, aiWarn, "budget", true);
+      }
+    }
+
+    return parsed;
+     
   } catch (error) {
-    console.log("Gemini budgetInsights parse error: ", response);
+    console.log("BudgetInsights error: ", error);
     return {
       totalsByCategory: {},
       warnings: [],
