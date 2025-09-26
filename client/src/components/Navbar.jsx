@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/slices/authSlice';
+import { fetchNotifications } from '../redux/slices/notificationSlice';
 import { motion } from 'framer-motion';
 import { Bell, CircleUser, House, CirclePlus, List, ChartNoAxesColumnIncreasing, Settings, LogOut, Menu, X, Satellite } from "lucide-react";
 import logo from "../assets/logo.png";
@@ -24,6 +25,12 @@ function Navbar() {
     dispatch(logout());
     navigate("/");
   }
+
+  useEffect(() => {
+    if(user._id) {
+      dispatch(fetchNotifications(user._id));
+    }
+  }, [user._id, dispatch]);
 
   return (
     <nav className='relative bg-white shadow-md md:px-16 md:py-3 px-2 py-2 flex items-center justify-between'>
