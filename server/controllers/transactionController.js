@@ -1,14 +1,36 @@
 import transactionModel from "../models/Transaction.js";
 import budgetModel from "../models/Budget.js";
-import { autoCategorizeTransaction, extractTransactionFromReceipt } from "../services/gemini.js";
+import { autoCategorizeTransaction, extractTransactionFromReceipt, budgetInsights } from "../services/gemini.js";
+import { createNotification } from "../services/notificationService.js";
 import fs from "fs";
 import mime from "mime-types";
+import { create } from "domain";
 
 const updateCategorySpent = (budget, category, amount) => {
   const cat = budget.categoryBudgets.find(c => c.category === category);
   if(cat) {
     cat.spent = (cat.spent || 0) + amount;
     if(cat.spent < 0) cat.spent = 0;
+  }
+}
+
+const triggerBudgetCheck = async (userId, month, year) => {
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 0);
+
+  const transactions = await transactionModel.find({
+    userId, date: { $gte: start, $lte: end },
+  });
+
+  const budget = await budgetModel.findOne({ userId, month, year });
+  if(!budget) return;
+
+  const insights = await budgetInsights(userId, transactions, budget);
+
+  if(insights.warnings && insights.warnings.length > 0) {
+    for(let w of insights.warnings) {
+      await createNotification(userId, w, "budget", true);
+    }
   }
 }
 
@@ -50,9 +72,12 @@ export const addTransaction = async (req, res) => {
           categoryBudgets: [],
         });
       }
+
       budget.spent += Number(amount);
       updateCategorySpent(budget, category, Number(amount));
       await budget.save();
+
+      await triggerBudgetCheck(userId, month, year);
     }
 
     res.status(201).json({ message: "New transaction added", transaction });
@@ -116,6 +141,8 @@ export const updateTransaction = async (req, res) => {
       newBudget.spent += updatedTransaction.amount;
       updateCategorySpent(newBudget, updatedTransaction.category, updatedTransaction.amount);
       await newBudget.save();
+
+      await triggerBudgetCheck(req.user.id, newMonth, newYear);
     }
 
     res.json({ message: "Transaction updated", transaction: updatedTransaction });
@@ -151,6 +178,8 @@ export const deleteTransaction = async (req, res) => {
         if(budget.spent < 0) budget.spent = 0;
         updateCategorySpent(budget, transaction.category, -transaction.amount);
         await budget.save();
+
+        await triggerBudgetCheck(req.user.id, month, year);
       }
     }
     
