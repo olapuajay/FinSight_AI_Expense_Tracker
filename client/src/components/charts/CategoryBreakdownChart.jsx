@@ -47,11 +47,15 @@ export default function CategoryBreakdownChart({ userId, month, year }) {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl p-6 shadow-lg w-full">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="md:text-lg text-md font-semibold text-gray-800">Category Breakdown</h3>
+      <div className="bg-white rounded-2xl p-4 shadow w-full animate-pulse">
+        <div className="flex justify-between items-center mb-4">
+          <div className="h-5 bg-gray-300 rounded w-1/3"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/6"></div>
         </div>
-        <div className="h-64 bg-gray-100 animate-pulse rounded-lg"></div>
+        <div className="overflow-x-auto">
+          <div className="min-w-[500px] h-64 sm:h-80 md:h-96 md:min-w-full bg-gray-200 rounded"></div>
+        </div>
+        <div className="mt-4 h-16 bg-gray-100 rounded"></div>
       </div>
     );
   }

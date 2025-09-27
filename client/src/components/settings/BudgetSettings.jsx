@@ -67,6 +67,17 @@ const BudgetSettings = () => {
     }
   };
 
+  if (budgetLoading) {
+    return (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+        <div className="h-10 bg-gray-200 rounded"></div>
+        <div className="h-10 bg-gray-200 rounded"></div>
+        <div className="h-40 bg-gray-200 rounded"></div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <h2 className="md:text-lg text-md font-semibold mb-2">Budget Settings</h2>
@@ -135,14 +146,14 @@ const BudgetSettings = () => {
           <button
             onClick={handleSaveBudget}
             disabled={budgetLoading}
-            className="bg-blue-600 text-white text-sm md:text-base md:px-4 md:py-2 px-2 py-1 rounded hover:bg-blue-700"
+            className="bg-blue-600 text-white text-sm md:text-base px-4 py-2 rounded hover:bg-blue-700"
           >
             {budget ? "Update Budget" : "Set Budget"}
           </button>
           {budget && (
             <button
               onClick={handleDeleteBudget}
-              className="bg-red-500 text-white text-sm md:text-base md:px-4 md:py-2 px-2 py-1 rounded hover:bg-red-600"
+              className="bg-red-500 text-white text-sm md:text-base px-4 py-2 rounded hover:bg-red-600"
             >
               Delete Budget
             </button>

@@ -64,10 +64,20 @@ const ProfileForm = () => {
     dispatch(updateProfile(payload));
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) {
+    return (
+      <div className="mb-6 animate-pulse space-y-4">
+        <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+        <div className="h-10 bg-gray-200 rounded"></div>
+        <div className="h-10 bg-gray-200 rounded"></div>
+        <div className="h-10 bg-gray-200 rounded"></div>
+        <div className="h-10 bg-gray-200 rounded w-28"></div>
+      </div>
+    );
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 mb-10">
+    <form onSubmit={handleSubmit} className="mb-6">
       <h3 className="md:text-lg text-md font-semibold mb-2">Update Profile</h3>
 
       <div>
@@ -106,7 +116,7 @@ const ProfileForm = () => {
 
       <button
         type="submit"
-        className="px-4 py-2 bg-blue-600 text-white rounded"
+        className="px-4 py-2 md:text-base text-sm bg-blue-600 text-white rounded"
       >
         Save Profile
       </button>

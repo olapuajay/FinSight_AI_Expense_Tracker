@@ -4,7 +4,7 @@ let socket;
 
 export const initSocket = (token) => {
   if (!socket) {
-    socket = io("http://localhost:8000", {
+    socket = io("https://finsight-xxio.onrender.com/", {
       withCredentials: true,
       auth: { token },
     });

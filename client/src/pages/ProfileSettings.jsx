@@ -12,10 +12,9 @@ const ProfileSettings = () => {
   return (
     <div>
       <Navbar />
-      <div className="md:px-16 px-2 mt-4">
+      <div className="md:px-16 px-2 my-4">
         <h2 className="md:text-2xl text-lg font-bold mb-4">Profile & Settings</h2>
 
-        {/* Header */}
         <div className="flex items-center justify-between mb-6 border-b pb-4">
           <div className="flex items-center gap-4">
             <img src={profilePhoto} alt="Profile" className="md:w-16 md:h-16 w-12 h-12 rounded-full border" />
@@ -29,7 +28,6 @@ const ProfileSettings = () => {
           </div>
         </div>
 
-        {/* Forms */}
         <ProfileForm />
         <BudgetSettings />
         <NotificationSettings userId={user?._id} />

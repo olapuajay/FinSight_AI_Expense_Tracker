@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-export default function IncomeVsExpenseChart({ data }) {
+export default function IncomeVsExpenseChart({ data, loading }) {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
@@ -68,49 +68,57 @@ export default function IncomeVsExpenseChart({ data }) {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="min-w-[500px] h-80 md:min-w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={data}
-              margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
-              barSize={35}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="#f0f0f0"
-                vertical={false}
-              />
-              <XAxis
-                dataKey="month"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12, fill: "#6B7280" }}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12, fill: "#6B7280" }}
-                tickFormatter={(value) => `₹${value / 1000}k`}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend content={renderLegend} />
-              <Bar
-                dataKey="income"
-                fill="#10B981"
-                name="Income"
-                radius={[4, 4, 0, 0]}
-              />
-              <Bar
-                dataKey="expense"
-                fill="#EF4444"
-                name="Expense"
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+      {loading ? (
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+          <div className="h-80 bg-gray-200 rounded-lg w-full"></div>
         </div>
-      </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <div className="min-w-[500px] h-80 md:min-w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={data}
+                margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                barSize={35}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#f0f0f0"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: "#6B7280" }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: "#6B7280" }}
+                  tickFormatter={(value) => `₹${value / 1000}k`}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend content={renderLegend} />
+                <Bar
+                  dataKey="income"
+                  fill="#10B981"
+                  name="Income"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="expense"
+                  fill="#EF4444"
+                  name="Expense"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

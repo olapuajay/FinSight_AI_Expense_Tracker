@@ -6,9 +6,11 @@ import { fetchSpendingTrend } from "../../api/charts";
 export default function SpendingTrendChart({ userId, month, year }) {
   const [data, setData] = useState([]);
   const [selectedPoint, setSelectedPoint] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!userId) return;
+    setLoading(true);
     (async () => {
       try {
         const trend = await fetchSpendingTrend(userId, month, year);
@@ -20,9 +22,26 @@ export default function SpendingTrendChart({ userId, month, year }) {
         setData(chartData);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     })();
   }, [userId, month, year]);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl p-4 shadow w-full animate-pulse">
+        <div className="flex justify-between items-center mb-4">
+          <div className="h-5 bg-gray-300 rounded w-1/3"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/6"></div>
+        </div>
+        <div className="overflow-x-auto">
+          <div className="min-w-[500px] h-64 sm:h-80 md:h-96 md:min-w-full bg-gray-200 rounded"></div>
+        </div>
+        <div className="mt-4 h-16 bg-gray-100 rounded"></div>
+      </div>
+    );
+  }
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {

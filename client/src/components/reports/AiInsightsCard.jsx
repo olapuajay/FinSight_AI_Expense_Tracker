@@ -40,7 +40,7 @@ function AiInsightsCards({ userId, month, year }) {
         <h3 className="md:text-lg text-md font-semibold text-gray-800">Gemini's Financial Insights</h3>
         <p className="text-sm text-gray-500 mt-1 mb-2">AI-powered personalized financial advice</p>
       </div>
-      {!loaded && (
+      {!loaded && !loading && (
         <div className="flex justify-center items-center py-16">
           <button
             onClick={loadInsights}
@@ -52,12 +52,18 @@ function AiInsightsCards({ userId, month, year }) {
       )}
 
       {loading && (
-        <div className="flex flex-col items-center justify-center py-10">
-          <div className="relative">
-            <div className="w-12 h-12 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin mb-4"></div>
-          </div>
-          <p className="text-gray-600">Analyzing your spending patterns...</p>
-          <p className="text-sm text-gray-400 mt-1">This may take a few moments</p>
+        <div className="grid md:grid-cols-3 gap-4 animate-pulse">
+          {[...Array(3)].map((_, idx) => (
+            <div key={idx} className="p-4 bg-[#E5E7EB] rounded-2xl shadow flex flex-col space-y-3">
+              <div className="flex justify-between items-center">
+                <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                <div className="h-6 w-6 bg-gray-200 rounded-full"></div>
+              </div>
+              <div className="h-3 bg-gray-200 rounded w-full"></div>
+              <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          ))}
         </div>
       )}
 

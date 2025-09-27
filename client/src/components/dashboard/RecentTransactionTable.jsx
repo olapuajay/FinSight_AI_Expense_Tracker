@@ -22,7 +22,6 @@ const RecentTransactionsTable = () => {
     <div className="my-4">
       <h2 className="md:text-lg text-md font-semibold mb-4">Recent Transactions</h2>
 
-      {loading && <p className="text-[#6B7280]">Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       <div className="overflow-x-auto">
@@ -37,7 +36,28 @@ const RecentTransactionsTable = () => {
             </tr>
           </thead>
           <tbody>
-            {recentTransactions.length === 0 ? (
+            {
+              loading ? (
+                [...Array(5)].map((_, idx) => (
+                <tr key={idx} className="animate-pulse">
+                  <td className="py-3 px-4">
+                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-4 bg-gray-200 rounded w-16"></div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-4 bg-gray-200 rounded w-28"></div>
+                  </td>
+                </tr>
+              ))
+            ) : recentTransactions.length === 0 ? (
               <tr>
                 <td
                   colSpan="5"

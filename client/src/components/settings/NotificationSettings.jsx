@@ -40,15 +40,21 @@ const NotificationSettings = ({ userId }) => {
   };
 
   return (
-    <div className="p-4 bg-white shadow rounded">
-      <h2 className="text-xl font-semibold mb-4">Notification Settings</h2>
+    <div className="mt-4">
+      <h2 className="md:text-lg text-md font-semibold mb-2">Notification Settings</h2>
 
-      {loading && <p>Loading...</p>}
+      {loading && (
+        <div className="space-y-3 animate-pulse">
+          <div className="h-5 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-5 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-5 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      )}
+
       {error && <p className="text-red-500">{error}</p>}
       {success && <p className="text-green-500">Settings updated!</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Budget Alerts */}
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -59,7 +65,6 @@ const NotificationSettings = ({ userId }) => {
           Budget Alerts
         </label>
 
-        {/* AI Insights */}
         <div>
           <label className="flex items-center gap-2">
             <input
@@ -84,7 +89,6 @@ const NotificationSettings = ({ userId }) => {
           )}
         </div>
 
-        {/* Reminders */}
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -95,7 +99,7 @@ const NotificationSettings = ({ userId }) => {
           Daily Expense Reminder
         </label>
 
-        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
+        <button type="submit" className="px-4 py-2 md:text-base text-sm bg-blue-600 text-white rounded">
           Save Settings
         </button>
       </form>
