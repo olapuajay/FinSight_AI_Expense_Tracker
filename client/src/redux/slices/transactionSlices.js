@@ -64,7 +64,7 @@ export const editTransaction = createAsyncThunk(
 export const transactionSlice = createSlice({
   name: "transaction",
   initialState: {
-    transactions: [], extracted: null, loading: false, error: null,
+    transactions: [], extracted: null, loading: false, uploading: false, error: null,
   },
   reducers: {
     clearExtracted: (state) => {
@@ -86,15 +86,15 @@ export const transactionSlice = createSlice({
         state.error = action.payload;
       })
       .addCase(uploadReceipt.pending, (state) => {
-        state.loading = true;
+        state.uploading = true;
         state.error = null;
       })
       .addCase(uploadReceipt.fulfilled, (state, action) => {
-        state.loading = false;
+        state.uploading = false;
         state.extracted = action.payload.extracted;
       })
       .addCase(uploadReceipt.rejected, (state, action) => {
-        state.loading = false;
+        state.uploading = false;
         state.error = action.payload;
       })
       .addCase(fetchTransactions.pending, (state) => {

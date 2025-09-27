@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { editTransaction } from "../redux/slices/transactionSlices";
 
-const EditTransactionModal = ({ isOpen, onClose, transaction }) => {
+const EditTransactionModal = ({ isOpen, onClose, transaction, onUpdated  }) => {
   const dispatch = useDispatch();
 
   const [form, setForm] = useState({
@@ -20,7 +20,7 @@ const EditTransactionModal = ({ isOpen, onClose, transaction }) => {
         amount: transaction.amount,
         type: transaction.type,
         category: transaction.category,
-        date: transaction.date.split("T")[0], // format YYYY-MM-DD
+        date: transaction.date.split("T")[0],
         payment: transaction.payment,
         note: transaction.note || "",
       });
@@ -34,6 +34,7 @@ const EditTransactionModal = ({ isOpen, onClose, transaction }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(editTransaction({ id: transaction._id, updatedData: form }));
+    if (onUpdated) onUpdated();
     onClose();
   };
 
@@ -50,14 +51,14 @@ const EditTransactionModal = ({ isOpen, onClose, transaction }) => {
             placeholder="Amount"
             value={form.amount}
             onChange={handleChange}
-            className="w-full border rounded p-2"
+            className="w-full border rounded p-2 outline-none focus:border-blue-600"
             required
           />
           <select
             name="type"
             value={form.type}
             onChange={handleChange}
-            className="w-full border rounded p-2"
+            className="w-full border rounded p-2 outline-none focus:border-blue-600"
           >
             <option value="expense">Expense</option>
             <option value="income">Income</option>
@@ -68,7 +69,7 @@ const EditTransactionModal = ({ isOpen, onClose, transaction }) => {
             placeholder="Category"
             value={form.category}
             onChange={handleChange}
-            className="w-full border rounded p-2"
+            className="w-full border rounded p-2 outline-none focus:border-blue-600"
             required
           />
           <input
@@ -76,7 +77,7 @@ const EditTransactionModal = ({ isOpen, onClose, transaction }) => {
             name="date"
             value={form.date}
             onChange={handleChange}
-            className="w-full border rounded p-2"
+            className="w-full border rounded p-2 outline-none focus:border-blue-600"
           />
           <select
             name="payment"
@@ -93,19 +94,19 @@ const EditTransactionModal = ({ isOpen, onClose, transaction }) => {
             placeholder="Notes"
             value={form.note}
             onChange={handleChange}
-            className="w-full border rounded p-2"
+            className="w-full border rounded p-2 outline-none focus:border-blue-600"
           />
           <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded bg-gray-200"
+              className="px-4 py-2 rounded bg-[#E5E7EB] hover:bg-gray-400 duration-300"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded bg-blue-600 text-white"
+              className="px-4 py-2 rounded bg-[#2563EB] hover:bg-blue-700 text-white duration-300"
             >
               Save
             </button>

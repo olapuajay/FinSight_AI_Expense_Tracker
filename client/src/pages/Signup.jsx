@@ -51,7 +51,7 @@ function Register() {
               value={formData.name}
               onChange={handleChange}
               required
-              className='w-full mt-1 px-3 py-2 border rounded-md shadow-sm outline-0 focus:border-blue-500 focus:border-2'
+              className='w-full mt-1 px-3 py-2 border rounded-md shadow-sm outline-0 text-[#111827] focus:border-[#2563EB] focus:border-2'
               placeholder='Your Name'
             />
           </div>
@@ -63,7 +63,7 @@ function Register() {
               value={formData.email}
               onChange={handleChange}
               required
-              className='w-full mt-1 px-3 py-2 border rounded-md shadow-sm outline-0 focus:border-blue-500 focus:border-2'
+              className='w-full mt-1 px-3 py-2 border rounded-md shadow-sm outline-0 text-[#111827] focus:border-[#2563EB] focus:border-2'
               placeholder='you@example.com'
             />
           </div>
@@ -75,7 +75,7 @@ function Register() {
               value={formData.password}
               onChange={handleChange}
               required
-              className='w-full mt-1 px-3 py-2 border rounded-md shadow-sm outline-0 focus:border-blue-500 focus:border-2'
+              className='w-full mt-1 px-3 py-2 border rounded-md shadow-sm outline-0 text-[#111827] focus:border-[#2563EB] focus:border-2'
               placeholder='••••••••'
             />
           </div>

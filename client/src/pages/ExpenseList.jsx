@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { deleteTransaction, fetchTransactions } from '../redux/slices/transactionSlices';
 import EditTransactionModal from '../components/EditTransactionModal';
 import Navbar from '../components/Navbar';
+import { ArrowUpDown, Funnel, Pencil, Search, Trash } from 'lucide-react';
 
 const categories = ["Groceries", "Food", "Transport", "Entertainment", 'Bills', "Other"];
 const paymentMethods = ["cash", "upi", "card"];
@@ -18,7 +19,6 @@ function ExpenseList() {
 
   const [editingTx, setEditingTx] = useState(null);
 
-  // States
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -26,15 +26,16 @@ function ExpenseList() {
   const [selectedAmounts, setSelectedAmounts] = useState([]);
   const [sortBy, setSortBy] = useState("");
 
-  // Dropdown states
   const [showFilters, setShowFilters] = useState(false);
   const [showSort, setShowSort] = useState(false);
+
+  const [message, setMessage] = useState("");
+  const [deletingIds, setDeletingIds] = useState([]);
 
   useEffect(() => {
     dispatch(fetchTransactions());
   }, [dispatch]);
 
-  // Filtering logic
   const filteredTransactions = transactions.filter((tx) => {
     if(search && !tx.category.toLowerCase().includes(search.toLowerCase()) && !tx.note?.toLowerCase().includes(search.toLowerCase())) {
       return false;
@@ -102,6 +103,22 @@ function ExpenseList() {
     );
   };
 
+  const handleDelete = async (id) => {
+    setDeletingIds((prev) => [...prev, id]);
+    try {
+      await dispatch(deleteTransaction(id)).unwrap();
+      dispatch(fetchTransactions());
+      setMessage("transaction deleted successfully!");
+      setTimeout(() => {setMessage("")}, 3000);
+    } catch (error) {
+      console.log("Failed to delete", error);
+      setMessage("Failed to delete transaction");
+      setTimeout(() => setMessage(""), 3000);
+    } finally {
+      setDeletingIds((prev) => prev.filter((delId) => delId !== id));
+    }
+  };
+
   return (
     <div>
       <Navbar />
@@ -110,25 +127,37 @@ function ExpenseList() {
 
         {/* Search + Buttons */}
         <div className="mb-6 flex flex-col md:flex-row gap-4 items-center">
-          <input
-            type="text"
-            placeholder="Search by category or notes..."
-            className="border rounded-lg p-2 w-full md:w-1/3 md:text-base text-sm outline-0 focus:border-[#2563EB] text-[#6B7280]"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <div className="relative w-full md:w-1/3">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+              <Search className='h-5 w-5' />
+            </span>
+            <input
+              type="text"
+              placeholder="Search by category or notes..."
+              className="border rounded-lg p-2 pl-10 w-full md:text-base text-sm outline-0 focus:border-[#2563EB] text-[#6B7280]"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
 
           <div className='flex gap-4'>
             <button
-              className="border px-4 py-2 rounded-lg md:text-base text-sm bg-gray-100 hover:bg-gray-200"
+              className="border px-4 py-2 rounded-lg md:text-base text-sm bg-gray-100 hover:bg-gray-200 flex items-center gap-1"
               onClick={() => setShowFilters(!showFilters)}
             >
+              <span>
+                <Funnel className='h-4 w-4' />
+              </span>
               Filters
             </button>
             <button
-              className="border px-4 py-2 rounded-lg md:text-base text-sm bg-gray-100 hover:bg-gray-200"
+              className="border px-4 py-2 rounded-lg md:text-base text-sm bg-gray-100 hover:bg-gray-200 flex items-center gap-1"
               onClick={() => setShowSort(!showSort)}
             >
+              <span>
+                <ArrowUpDown className='h-4 w-4' />
+              </span>
               Sort
             </button>
           </div>
@@ -136,7 +165,7 @@ function ExpenseList() {
 
         {/* Filters Dropdown */}
         {showFilters && (
-          <div className="mb-6 p-4 bg-white rounded-lg shadow-md grid md:grid-cols-3 gap-6">
+          <div className="mb-6 p-4 bg-white rounded-lg shadow-md grid md:grid-cols-4 gap-6">
             <div>
               <h3 className="font-medium mb-2">Date Range</h3>
               <div className="flex flex-wrap gap-2">
@@ -229,17 +258,22 @@ function ExpenseList() {
           </div>
         )}
 
+        {message && (
+          <div className="mb-4 p-3 bg-green-100 text-green-800 rounded">
+            {message}
+          </div>
+        )}
         {/* Table */}
         <div className="bg-white overflow-x-auto rounded-lg shadow">
           <table className="min-w-full border-collapse">
             <thead>
               <tr className="bg-gray-100 text-left text-sm font-medium text-gray-700">
-                <th className="py-2 px-4">Date</th>
-                <th className="py-2 px-4">Amount</th>
-                <th className="py-2 px-4">Category</th>
-                <th className="py-2 px-4">Payment</th>
-                <th className="py-2 px-4">Notes</th>
-                <th className="py-2 px-4">Actions</th>
+                <th className="py-2 px-4 uppercase">Date</th>
+                <th className="py-2 px-4 uppercase">Amount</th>
+                <th className="py-2 px-4 uppercase">Category</th>
+                <th className="py-2 px-4 uppercase">Payment</th>
+                <th className="py-2 px-4 uppercase">Notes</th>
+                <th className="py-2 px-4 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -265,7 +299,7 @@ function ExpenseList() {
                   sortedTransactions.map((tx) => (
                     <tr
                       key={tx._id}
-                      className="border-b hover:bg-gray-50 text-sm text-gray-700"
+                      className=" hover:bg-gray-50 text-sm text-gray-700"
                     >
                       <td className="py-2 px-4">{new Date(tx.date).toLocaleDateString()}</td>
                       <td className={`py-2 px-4 font-semibold ${tx.type === "expense" ? "text-red-500" : "text-green-500"}`}>
@@ -274,9 +308,17 @@ function ExpenseList() {
                       <td className="py-2 px-4">{tx.category}</td>
                       <td className="py-2 px-4 capitalize">{tx.payment}</td>
                       <td className="py-2 px-4 truncate max-w-[150px]">{tx.note || "-"}</td>
-                      <td className="py-2 px-4 flex gap-2">
-                        <button className="text-blue-600 hover:underline" onClick={() => setEditingTx(tx)}>Edit</button>
-                        <button className="text-red-600 hover:underline" onClick={() => dispatch(deleteTransaction(tx._id))}>Delete</button>
+                      <td className="py-2 px-4 flex gap-2 items-center">
+                        <button className="text-blue-600 hover:bg-gray-200 p-2 rounded-full duration-300" onClick={() => setEditingTx(tx)}>
+                          <Pencil className='h-4 w-4' />
+                        </button>
+                        {deletingIds.includes(tx._id) ? (
+                          <div className="border-2 h-5 w-5 rounded-full border-b-transparent animate-spin text-red-500"></div>
+                        ) : (
+                          <button className="text-red-600 hover:bg-gray-200 p-2 rounded-full duration-300" onClick={() => handleDelete(tx._id)}>
+                            <Trash className='h-4 w-4' />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -287,6 +329,11 @@ function ExpenseList() {
             isOpen={!!editingTx}
             onClose={() => setEditingTx(null)}
             transaction={editingTx}
+            onUpdated={() => {
+              dispatch(fetchTransactions());
+              setMessage("Transaction updated successfully!");
+              setTimeout(() => {setMessage("")}, 3000);
+            }}
           />
         </div>
       </div>

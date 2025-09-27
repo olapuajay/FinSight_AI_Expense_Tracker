@@ -18,7 +18,6 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await dispatch(loginUser(formData));
-    // console.log(result)
     if(result.meta.requestStatus === "fulfilled") {
       navigate("/dashboard");
     }
@@ -38,26 +37,26 @@ function Login() {
         </div>
         <form onSubmit={handleSubmit} className='space-y-4'>
           <div>
-            <label className='block text-sm font-medium text-gray-700'>Email</label>
+            <label className='block text-sm font-medium text-[#6B7280]'>Email</label>
             <input 
               type="email"
               name='email'
               value={formData.email}
               onChange={handleChange}
               required
-              className='w-full mt-1 px-3 py-2 border rounded-md shadow-sm outline-0 focus:border-blue-500 focus:border-2'
+              className='w-full mt-1 px-3 py-2 border rounded-md shadow-sm outline-0 text-[#111827] focus:border-[#2563EB] focus:border-2'
               placeholder='you@example.com'
             />
           </div>
           <div>
-            <label className='block text-sm font-medium text-gray-700'>Password</label>
+            <label className='block text-sm font-medium text-[#6B7280]'>Password</label>
             <input 
               type="password"
               name='password'
               value={formData.password}
               onChange={handleChange}
               required
-              className='w-full mt-1 px-3 py-2 border rounded-md shadow-sm outline-0 focus:border-blue-500 focus:border-2'
+              className='w-full mt-1 px-3 py-2 border rounded-md shadow-sm outline-0 text-[#111827] focus:border-[#2563EB] focus:border-2'
               placeholder='••••••••'
             />
           </div>
@@ -65,14 +64,19 @@ function Login() {
             <p className='text-red-500 text-sm mt-2'>{error}</p>
           )}
 
-          <button type='submit' disabled={loading} className='w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition duration-300'>
-            {loading ? "Logging in..." : "LOGIN"}
+          <button type='submit' disabled={loading} className='w-full bg-[#2563EB] text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 cursor-pointer transition duration-300'>
+            {loading ? (
+              <div className='flex justify-center items-center'>
+                <span>Logging in</span>
+                <div className="ml-2 border-2 h-4 w-4 rounded-full border-b-transparent animate-spin text-white"></div>
+              </div>
+              ) : "LOGIN"}
           </button>
         </form>
 
         <p className='text-center text-sm text-gray-600 mt-4'>
           New to FinSight?{" "}
-          <a href="/signup" className='text-blue-600 hover:underline'>Sign up</a>
+          <a href="/register" className='text-blue-600 hover:underline'>Sign up</a>
         </p>
 
         <p className='text-center text-xs text-gray-600 mt-4 italic'>

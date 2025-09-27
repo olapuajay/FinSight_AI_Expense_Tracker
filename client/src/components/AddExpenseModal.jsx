@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 
 const AddExpenseModal = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
-  const { loading, extracted } = useSelector((state) => state.transactions);
+  const { loading, uploading, extracted } = useSelector((state) => state.transactions);
 
   const [form, setForm] = useState({
     amount: "",
@@ -70,11 +70,7 @@ const AddExpenseModal = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let receiptUrl = null;
-    if(receipt) {
-      const uploadRes = await dispatch(uploadReceipt(receipt)).unwrap();
-      receiptUrl = uploadRes?.url;
-    }
+    const receiptUrl = extracted?.url || null;
 
     const transactionData = {
       ...form,
@@ -93,6 +89,8 @@ const AddExpenseModal = ({ isOpen, onClose }) => {
       }
     }
 
+    await dispatch(addTransaction(transactionData));
+
     setForm({
       amount: "",
       type: "expense",
@@ -106,9 +104,8 @@ const AddExpenseModal = ({ isOpen, onClose }) => {
         endDate: "",
       },
     });
-    setReceipt(null);
 
-    await dispatch(addTransaction(transactionData));
+    setReceipt(null);
     onClose();
   }
 
@@ -222,6 +219,10 @@ const AddExpenseModal = ({ isOpen, onClose }) => {
               />
             </label>
 
+            {uploading && (
+              <p className="text-sm text-blue-500 mt-2 text-center">Uploading receipt...</p>
+            )}
+
             {preview && (
               <div className='mt-3 flex justify-center'>
                 <img src={preview} alt="Receipt Preview" className='w-56 h-full rounded-md border' />
@@ -242,7 +243,12 @@ const AddExpenseModal = ({ isOpen, onClose }) => {
               disabled={loading}
               className='px-4 py-2 w-full rounded bg-[#2563EB] text-white hover:bg-blue-700 duration-300'
             >
-              {loading ? "Saving..." : "ADD"}
+              {loading ? (
+                <div className='flex justify-center items-center'>
+                  <span>Saving</span>
+                  <div className="ml-2 border-2 h-4 w-4 rounded-full border-b-transparent animate-spin text-white"></div>
+                </div>
+                ) : "ADD"}
             </button>
           </div>
         </form>
