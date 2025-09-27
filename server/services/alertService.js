@@ -1,6 +1,7 @@
 import transactionModel from "../models/Transaction.js";
 import budgetModel from "../models/Budget.js";
 import notificationModel from "../models/Notification.js";
+import userModel from "../models/User.js";
 import { askGemini } from "./gemini.js";
 import { createNotification } from "./notificationService.js";
 import notificationSettingsModel from "../models/NotificationSettings.js";
@@ -73,5 +74,24 @@ export const generateAiAlerts = async () => {
     }
   } catch (error) {
     console.log("AI alert generation failed: ", error);
+  }
+};
+
+export const generateDailyReminders = async (io) => {
+  try {
+    const users = await userModel.find({});
+
+    for(const user of users) {
+      const firstName = user.name?.split(" ")[0] || "there";
+      const message = `Hey ${firstName}, don't forget to log your expenses today to stay on track with your budgets!`;
+
+      const notification = await notificationModel.create({
+        userId: user._id, message,
+      });
+
+      io.to(user._id.toString()).emit("newNotification", notification);
+    }
+  } catch (error) {
+    console.log("Error generating daily reminders: ", error);
   }
 };
