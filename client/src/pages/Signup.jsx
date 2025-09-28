@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { signupUser } from "../redux/slices/authSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import loginImage from "../assets/login.png";
 import logo from "../assets/logo.png";
 
@@ -90,7 +90,7 @@ function Register() {
 
         <p className='text-center text-sm text-gray-600 mt-4'>
           Already have an account?{" "}
-          <a href="/login" className='text-blue-600 hover:underline'>Log in</a>
+          <Link to="/login" className='text-blue-600 hover:underline'>Log in</Link>
         </p>
 
         <p className='text-center text-xs text-gray-600 mt-4 italic'>

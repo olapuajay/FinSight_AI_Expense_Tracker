@@ -76,7 +76,7 @@ function Login() {
 
         <p className='text-center text-sm text-gray-600 mt-4'>
           New to FinSight?{" "}
-          <a href="/register" className='text-blue-600 hover:underline'>Sign up</a>
+          <Link to="/register" className='text-blue-600 hover:underline'>Sign up</Link>
         </p>
 
         <p className='text-center text-xs text-gray-600 mt-4 italic'>
