@@ -6,7 +6,7 @@ let io;
 export const initSocket = (server) => {
   io = new Server(server, {
     cors: { 
-      origin: "https://finsight-et.netlify.app/", 
+      origin: "https://finsight-et.netlify.app", 
       methods: ["GET", "POST"] ,
       credentials: true,
     }
