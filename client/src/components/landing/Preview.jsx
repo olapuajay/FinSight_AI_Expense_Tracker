@@ -21,10 +21,10 @@ function Preview() {
         designed to keep your finances under control.
       </p>
 
-      <div className="grid grid-cols-2 gap-4 md:gap-6 max-w-4xl mx-auto">
+      <div className="grid md:grid-cols-2 grid-cols-1 gap-2 md:gap-6 max-w-4xl mx-auto">
         {screenshots.map((shot) => (
           <div key={shot.id} className="bg-white rounded-2xl shadow hover:shadow-lg transition-transform transform hover:scale-105 overflow-hidden">
-            <img src={shot.src} alt={shot.alt} className="w-full md:h-full h-24 object-cover" />
+            <img src={shot.src} alt={shot.alt} className="w-full h-full object-cover" />
           </div>
         ))}
       </div>

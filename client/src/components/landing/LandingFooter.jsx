@@ -1,11 +1,15 @@
 import React from 'react'
+import logo from "../../assets/logo.png";
 
 function LandingFooter() {
   return (
     <footer className='bg-[#111827] text-white md:py-10 py-4 px-4'>
       <div className='max-w-6xl mx-auto grid gap-8 md:grid-cols-3'>
         <div>
-          <h2 className='text-lg font-semibold md:mb-2 mb-1'>FinSight</h2>
+          <div className='flex items-center gap-2 mb-2'>
+            <img src={logo} alt="LOGO" className='md:h-15 h-10' />
+            <h2 className='text-lg font-semibold md:mb-2 mb-1'>FinSight</h2>
+          </div>
           <p className='text-sm text-gray-400'>
             Take control of your finances with smart insights and easy tracking.
           </p>
