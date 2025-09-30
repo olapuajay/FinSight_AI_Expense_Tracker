@@ -34,7 +34,7 @@ function Navbar() {
 
   return (
     <nav className='relative bg-white shadow-md md:px-16 md:py-3 px-2 py-2 flex items-center justify-between'>
-      <Link to="/dashboard" className='inline-flex items-center'>
+      <Link to="/" className='inline-flex items-center'>
         <img src={logo} className='md:w-15 w-10 h-full' alt="" />
         <h1 className='md:font-bold font-semibold md:text-2xl text-lg text-[#2563EB]'>FinSight</h1>
       </Link>
