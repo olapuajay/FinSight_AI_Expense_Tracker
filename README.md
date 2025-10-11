@@ -509,7 +509,7 @@ We welcome contributions to FinSight! Here's how you can help:
 
 Need help? Here are your options:
 
-- **📧 Email**: [your-email@example.com]
+- **📧 Email**: [olapuajay@gmail.com]
 - **💬 GitHub Issues**: [Create an issue](https://github.com/olapuajay/FinSight_AI_Expense_Tracker/issues)
 - **📖 Documentation**: Check this README and inline code comments
 - **🌐 Live Demo**: [https://finsight-et.netlify.app/](https://finsight-et.netlify.app/)
